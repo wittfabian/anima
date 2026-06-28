@@ -1138,6 +1138,7 @@
     const hide = force !== undefined ? force : !panel.classList.contains("hidden");
     panel.classList.toggle("hidden", hide);
     reopen.classList.toggle("show", hide);
+    if (hide && panel.contains(document.activeElement)) document.activeElement.blur();
   }
 
   function setPaused(p) {
@@ -1179,7 +1180,7 @@
   help.addEventListener("click", (e) => { if (e.target === help) help.classList.remove("show"); });
 
   window.addEventListener("keydown", (e) => {
-    if (e.target.tagName === "INPUT") return;
+    if (e.target.tagName === "INPUT" && e.target.type !== "range") return;
     const k = e.key.toLowerCase();
     if (k === " ")        { e.preventDefault(); setPaused(!paused); showToast(paused ? "<b>paused</b>" : "<b>resumed</b>"); }
     else if (k === "r")   { document.getElementById("btn-random").click(); }
