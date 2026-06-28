@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>ANIMA — OG image generator (1200×630)</title>
+<!-- Reproducible source for /og-image.png. Open over a local server and
+     click "download" (or read window.__png). Re-render after rebrands. -->
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  html,body{margin:0;background:#222;color:#ccc;font-family:system-ui,sans-serif;}
+  #c{display:block;margin:20px auto;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+  .bar{text-align:center;padding:10px;}
+  button{font:inherit;padding:8px 16px;cursor:pointer;}
+</style>
+</head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<div class="bar"><button id="dl">download og-image.png</button></div>
+<script>
+const W = 1200, H = 630, cx = W / 2;
+const c = document.getElementById("c");
+const g = c.getContext("2d");
+const DIDONE = "'Bodoni Moda', Georgia, serif";
+const MONO = "'JetBrains Mono', ui-monospace, monospace";
+// world accent colours, in cabinet order (primordia … animalcula)
+const ACCENTS = ["#f4a428", "#62c7e0", "#5fe6c0", "#f0c27b", "#aef24a", "#3f6b46", "#b98cff"];
+
+async function draw() {
+  await Promise.all([
+    document.fonts.load(`400 130px ${DIDONE}`),
+    document.fonts.load(`italic 400 130px ${DIDONE}`),
+    document.fonts.load(`400 16px ${MONO}`),
+  ]);
+  await document.fonts.ready;
+
+  // background — radial wash, matching the gallery
+  const bg = g.createRadialGradient(cx, -80, 80, cx, 200, 900);
+  bg.addColorStop(0, "#101013");
+  bg.addColorStop(0.55, "#070708");
+  bg.addColorStop(1, "#040405");
+  g.fillStyle = bg;
+  g.fillRect(0, 0, W, H);
+  // vignette
+  const vig = g.createRadialGradient(cx, H * 0.44, 220, cx, H * 0.44, 780);
+  vig.addColorStop(0, "rgba(0,0,0,0)");
+  vig.addColorStop(1, "rgba(0,0,0,0.55)");
+  g.fillStyle = vig;
+  g.fillRect(0, 0, W, H);
+
+  g.textAlign = "center";
+  g.textBaseline = "alphabetic";
+
+  // eyebrow
+  g.fillStyle = "#8a877f";
+  g.font = `400 16px ${MONO}`;
+  g.letterSpacing = "7px";
+  g.fillText("A CABINET OF LIVING THINGS", cx + 4, 250);
+  g.letterSpacing = "0px";
+
+  // wordmark — "An" + italic "i" + "ma", drawn as segments to keep the styled i
+  const wy = 372;
+  const roman = `400 132px ${DIDONE}`;
+  const ital = `italic 400 132px ${DIDONE}`;
+  g.fillStyle = "#ece9e3";
+  g.textAlign = "left";
+  g.font = roman; const wA = g.measureText("An").width;
+  g.font = ital;  const wI = g.measureText("i").width;
+  g.font = roman; const wB = g.measureText("ma").width;
+  let px = cx - (wA + wI + wB) / 2;
+  g.font = roman; g.fillText("An", px, wy); px += wA;
+  g.font = ital;  g.fillText("i", px, wy);  px += wI;
+  g.font = roman; g.fillText("ma", px, wy);
+  g.textAlign = "center";
+
+  // seven world dots
+  const dy = 432, r = 7, gap = 30;
+  let dx = cx - ((ACCENTS.length - 1) * gap) / 2;
+  for (const col of ACCENTS) {
+    g.beginPath();
+    g.arc(dx, dy, r, 0, Math.PI * 2);
+    g.fillStyle = col;
+    g.fill();
+    dx += gap;
+  }
+
+  // subtitle
+  g.fillStyle = "#8a877f";
+  g.font = `400 16px ${MONO}`;
+  g.letterSpacing = "5px";
+  g.fillText("seven generative worlds", cx + 3, 484);
+  g.letterSpacing = "0px";
+
+  window.__png = c.toDataURL("image/png");
+  window.__done = true;
+}
+
+document.getElementById("dl").onclick = () => {
+  const a = document.createElement("a");
+  a.download = "og-image.png";
+  a.href = window.__png;
+  a.click();
+};
+
+draw();
+</script>
+</body>
+</html>
