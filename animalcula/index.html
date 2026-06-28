@@ -322,7 +322,7 @@
   function syncSliders(){ SLIDERS.forEach(cfg=>{ const i=sEls[cfg.key]; i.value=state[cfg.key]; upd(cfg,i); }); }
 
   const panel=document.getElementById("panel"),reopen=document.getElementById("reopen");
-  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); }
+  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); if(h&&panel.contains(document.activeElement))document.activeElement.blur(); }
   function setPaused(p){ paused=p; document.querySelector("#pause span").textContent=paused?"Resume":"Pause"; }
   function save(){ draw(); const a=document.createElement("a"); a.download=`animalcula-${Date.now()}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
   document.getElementById("pause").onclick=()=>setPaused(!paused);

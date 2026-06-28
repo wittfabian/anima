@@ -1138,6 +1138,7 @@
     const hide = force !== undefined ? force : !panel.classList.contains("hidden");
     panel.classList.toggle("hidden", hide);
     reopen.classList.toggle("show", hide);
+    if (hide && panel.contains(document.activeElement)) document.activeElement.blur();
   }
 
   function setPaused(p) {

@@ -226,7 +226,7 @@
   SLIDERS.forEach(cfg=>upd(cfg,sEls[cfg.key]));
 
   const panel=document.getElementById("panel"), reopen=document.getElementById("reopen");
-  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); }
+  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); if(h&&panel.contains(document.activeElement))document.activeElement.blur(); }
   function setPaused(p){ paused=p; document.querySelector("#play span").textContent=paused?"Run":"Pause"; }
   function save(){ const a=document.createElement("a"); a.download=`genesis-gen${gen}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
   document.getElementById("play").onclick=()=>setPaused(!paused);

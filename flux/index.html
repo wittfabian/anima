@@ -65,14 +65,14 @@
 
   .pname { font-family:var(--serif); font-style:italic; font-size:20px; min-width:118px; letter-spacing:0.01em; }
   .swatches { display:flex; gap:7px; }
-  .sw { width:15px; height:15px; border-radius:50%; cursor:pointer; opacity:0.5; transition:all .2s ease; border:1px solid rgba(255,255,255,0.12); }
+  .sw { width:15px; height:15px; border-radius:50%; cursor:pointer; opacity:0.5; transition:all .2s ease; border:1px solid rgba(255,255,255,0.12); appearance:none; padding:0; box-sizing:content-box; }
   .sw:hover { opacity:0.9; transform:scale(1.12); }
   .sw.on { opacity:1; transform:scale(1.18); box-shadow:0 0 0 2px rgba(255,255,255,0.18); }
 
   .div { width:1px; height:22px; background:var(--faint); }
 
   .ctrls { display:flex; align-items:center; gap:14px; color:var(--muted); }
-  .ico { cursor:pointer; color:var(--muted); transition:color .2s ease; font-size:14px; user-select:none; letter-spacing:0.05em; }
+  .ico { cursor:pointer; color:var(--muted); transition:color .2s ease; font-size:14px; user-select:none; letter-spacing:0.05em; appearance:none; background:none; border:0; padding:0; font-family:inherit; line-height:1; }
   .ico:hover { color:var(--ink); }
 
   .hint {
@@ -107,11 +107,11 @@
     <div class="swatches" id="swatches"></div>
     <div class="div"></div>
     <div class="ctrls">
-      <span class="ico" id="ic-pause" title="pause (space)">❚❚</span>
-      <span class="ico" id="ic-reseed" title="reshape the field (R)">↻</span>
-      <span class="ico" id="ic-clear" title="clear (C)">✕</span>
-      <span class="ico" id="ic-save" title="save image (S)">⤓</span>
-      <span class="ico" id="ic-hide" title="hide UI (H)">◎</span>
+      <button type="button" class="ico" id="ic-pause" title="pause (space)" aria-label="Pause">❚❚</button>
+      <button type="button" class="ico" id="ic-reseed" title="reshape the field (R)" aria-label="Reshape the field">↻</button>
+      <button type="button" class="ico" id="ic-clear" title="clear (C)" aria-label="Clear">✕</button>
+      <button type="button" class="ico" id="ic-save" title="save image (S)" aria-label="Save image">⤓</button>
+      <button type="button" class="ico" id="ic-hide" title="hide UI (H)" aria-label="Hide UI">◎</button>
     </div>
   </div>
 
@@ -260,7 +260,8 @@
   function buildSwatches(){
     swHost.innerHTML="";
     PNAMES.forEach((name,idx)=>{
-      const s=document.createElement("div");
+      const s=document.createElement("button");
+      s.type="button";
       s.className="sw"+(name===pal?" on":"");
       const mid = PALETTES[name].stops[3];
       const lo = PALETTES[name].stops[1];
@@ -280,7 +281,7 @@
   function save(){ const a=document.createElement("a"); a.download=`flux-${Date.now()}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
   function togglePause(){ paused=!paused; document.getElementById("ic-pause").textContent = paused?"▶":"❚❚"; }
   let hidden=false;
-  function toggleHide(){ hidden=!hidden; placard.classList.toggle("dim",hidden); document.querySelector(".mast").style.opacity=hidden?0:1; document.querySelector(".hint").style.opacity=hidden?0:1; }
+  function toggleHide(){ hidden=!hidden; placard.classList.toggle("dim",hidden); document.querySelector(".mast").style.opacity=hidden?0:1; document.querySelector(".hint").style.opacity=hidden?0:1; if(hidden&&placard.contains(document.activeElement))document.activeElement.blur(); }
 
   document.getElementById("ic-pause").onclick=togglePause;
   document.getElementById("ic-reseed").onclick=reseed;
