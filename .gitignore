@@ -1,0 +1,3 @@
+# Local lint tooling is installed on the fly (zero-footprint CI); never commit it.
+node_modules/
+package-lock.json
