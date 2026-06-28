@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>GENESIS — Conway's Game of Life (the ancestor)</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<meta name="theme-color" content="#04080a" />
+<meta name="description" content="A hidden room in ANIMA: Conway's Game of Life (1970), the ancestor of every world in the cabinet." />
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     GENESIS — Conway's Game of Life (1970). The hidden ancestor.
+     Aesthetic: phosphor-green CRT terminal.
+     ============================================================ */
+  :root{
+    --bg:#04080a; --ink:#caffd9; --green:#5dff9b; --dim:#2f7a52; --muted:#3f7a5e; --muted2:#2a4d3b;
+    --line:rgba(93,255,155,0.14); --line2:rgba(93,255,155,0.3); --accent:#5dff9b;
+    --term:"VT323",ui-monospace,monospace; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none;}
+  /* CRT scanlines + vignette */
+  .scan{position:fixed;inset:0;pointer-events:none;z-index:3;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 2px,rgba(0,0,0,0.16) 3px,rgba(0,0,0,0.16) 4px);mix-blend-mode:multiply;opacity:0.5;}
+  .vig{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(130% 110% at 50% 45%,transparent 55%,rgba(0,0,0,0.6) 100%);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:var(--mono);font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(93,255,155,0.55);text-decoration:none;padding:7px 15px;border:1px solid rgba(93,255,155,0.18);border-radius:100px;background:rgba(4,8,10,0.5);backdrop-filter:blur(10px);transition:color .25s,border-color .25s;}
+  .home-link:hover{color:var(--green);border-color:var(--line2);}
+
+  .mast{position:fixed;top:28px;left:34px;z-index:5;pointer-events:none;}
+  .mast h1{font-family:var(--term);font-weight:400;font-size:48px;line-height:0.8;letter-spacing:0.04em;color:var(--green);text-shadow:0 0 18px rgba(93,255,155,0.45);}
+  .mast .sub{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+  .mast .cur{display:inline-block;width:9px;height:18px;background:var(--green);margin-left:4px;vertical-align:-2px;animation:blink 1.1s step-end infinite;box-shadow:0 0 10px var(--green);}
+
+  .panel{position:fixed;top:16px;right:16px;bottom:16px;width:300px;z-index:6;display:flex;flex-direction:column;
+    background:rgba(5,12,10,0.78);border:1px solid var(--line);border-radius:13px;
+    backdrop-filter:blur(18px);box-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(93,255,155,0.04);
+    overflow:hidden;transition:transform .55s cubic-bezier(.16,1,.3,1),opacity .4s;}
+  .panel.hidden{transform:translateX(calc(100% + 26px));opacity:0;pointer-events:none;}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid var(--line);}
+  .head .t{font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);}
+  .head .t span{color:var(--green);}
+  .ib{width:25px;height:25px;display:grid;place-items:center;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;}
+  .ib:hover{color:var(--green);border-color:var(--line2);}
+  .body{flex:1;overflow-y:auto;padding:4px 16px 16px;}
+  .body::-webkit-scrollbar{width:7px;} .body::-webkit-scrollbar-thumb{background:rgba(93,255,155,0.12);border-radius:8px;}
+  .sec{padding:14px 0 2px;} .sec+.sec{border-top:1px solid var(--line);}
+  .st{font-size:9px;letter-spacing:0.26em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .st::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;padding:7px 9px;border-radius:6px;border:1px solid var(--line);background:rgba(93,255,155,0.02);color:var(--muted);cursor:pointer;transition:all .16s;}
+  .chip:hover{color:var(--ink);border-color:var(--line2);}
+  .ctrl{margin-bottom:13px;}
+  .crow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .cl{font-size:11px;color:var(--muted);} .cv{font-size:11px;color:var(--green);font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;cursor:pointer;}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,var(--green) var(--fill,0%),rgba(93,255,155,0.14) var(--fill,0%));}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-5px;border-radius:50%;background:#04140c;border:1.5px solid var(--green);}
+  input[type=range]::-moz-range-track{height:2px;background:rgba(93,255,155,0.14);border-radius:2px;}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#04140c;border:1.5px solid var(--green);}
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .btn{font-family:var(--mono);font-size:10px;letter-spacing:0.05em;padding:10px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(93,255,155,0.02);color:var(--ink);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn:hover{border-color:var(--line2);background:rgba(93,255,155,0.05);}
+  .btn:active{transform:translateY(1px);}
+  .btn.pri{border-color:var(--green);color:var(--green);background:rgba(93,255,155,0.1);}
+  .btn kbd{font-size:8px;color:var(--muted2);border:1px solid var(--line);border-radius:4px;padding:1px 4px;}
+  .note{font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--muted);}
+  .note b{color:var(--ink);font-weight:400;}
+  .foot{flex:0 0 auto;padding:11px 16px;border-top:1px solid var(--line);font-size:9px;letter-spacing:0.1em;color:var(--muted2);display:flex;justify-content:space-between;}
+  .reopen{position:fixed;top:16px;right:16px;z-index:6;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(5,12,10,0.78);backdrop-filter:blur(14px);color:var(--green);display:grid;place-items:center;cursor:pointer;font-size:16px;opacity:0;transform:scale(.85);pointer-events:none;transition:all .4s cubic-bezier(.16,1,.3,1);}
+  .reopen.show{opacity:1;transform:scale(1);pointer-events:auto;}
+  .hint{position:fixed;left:34px;bottom:24px;z-index:5;font-size:10px;letter-spacing:0.14em;line-height:1.9;color:var(--muted2);pointer-events:none;}
+  .hint b{color:var(--muted);font-weight:400;}
+  @keyframes blink{50%{opacity:0}}
+  @media (prefers-reduced-motion: reduce){.mast .cur{animation:none}*{transition-duration:.001ms!important}}
+  @media (max-width:740px){.panel{width:auto;left:12px;right:12px;top:auto;bottom:12px;height:54vh;}.hint{display:none}}
+</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="vig"></div>
+  <div class="scan"></div>
+  <a class="home-link" href="../index.html">✦&nbsp;anima</a>
+
+  <div class="mast">
+    <h1>GENESIS<span class="cur"></span></h1>
+    <div class="sub">conway's game of life · 1970 · the ancestor</div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <div class="head"><div class="t">ORIGIN <span>/ console</span></div><button class="ib" id="hide">›</button></div>
+    <div class="body">
+      <div class="sec"><div class="st">Patterns</div><div class="chips" id="presets"></div></div>
+      <div class="sec" id="sliders"></div>
+      <div class="sec"><div class="st">Actions</div>
+        <div class="acts">
+          <button class="btn pri" id="play"><span>Pause</span><kbd>Space</kbd></button>
+          <button class="btn" id="step">Step <kbd>.</kbd></button>
+          <button class="btn" id="rand">Random <kbd>R</kbd></button>
+          <button class="btn" id="clear">Clear <kbd>C</kbd></button>
+          <button class="btn" id="save">Save <kbd>S</kbd></button>
+          <button class="btn" id="hide2">Hide UI <kbd>H</kbd></button>
+        </div>
+      </div>
+      <div class="sec"><div class="st">The ancestor</div>
+        <p class="note">Two rules — <b>a live cell with 2 or 3 neighbours survives; a dead cell with exactly 3 is born</b> — and from them: gliders, guns, oscillators, computers. Devised by <b>John Horton Conway</b> in 1970, it is the great-grandparent of every world in this cabinet. <b>Draw</b> on the void to seed life.</p>
+      </div>
+    </div>
+    <div class="foot"><span id="fpreset">GOSPER GUN</span><span id="fgen">gen 0</span></div>
+  </aside>
+  <button class="reopen" id="reopen">⚙</button>
+
+  <div class="hint"><div><b>draw</b> to seed cells · <b>click presets</b></div><div><b>space</b> run/pause · <b>.</b> step · <b>R</b> random</div></div>
+
+<script>
+"use strict";
+(() => {
+  const canvas=document.getElementById("c"), ctx=canvas.getContext("2d");
+  let W,H,dpr,cell,cols,rows,grid,buf;
+  const state={ cell:9, speed:12, wrap:true };
+
+  function resize(){
+    dpr=Math.min(devicePixelRatio||1,2);
+    W=canvas.width=Math.floor(innerWidth*dpr); H=canvas.height=Math.floor(innerHeight*dpr);
+    canvas.style.width=innerWidth+"px"; canvas.style.height=innerHeight+"px";
+    cell=Math.max(3,Math.round(state.cell*dpr));
+    cols=Math.floor(W/cell); rows=Math.floor(H/cell);
+    const ng=new Uint8Array(cols*rows);
+    if(grid){ // preserve existing pattern (top-left aligned) across resizes
+      const oc=Math.min(cols, gridCols), orr=Math.min(rows, gridRows);
+      for(let y=0;y<orr;y++) for(let x=0;x<oc;x++) ng[y*cols+x]=grid[y*gridCols+x];
+    }
+    grid=ng; buf=new Uint8Array(cols*rows); gridCols=cols; gridRows=rows;
+    ctx.fillStyle="#04080a"; ctx.fillRect(0,0,W,H);
+  }
+  let gridCols=0, gridRows=0;
+  let rt; addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(resize,200); });
+
+  /* ---------- patterns (relative cells) ---------- */
+  const P = {
+    "GLIDER":[[1,0],[2,1],[0,2],[1,2],[2,2]],
+    "LWSS":[[0,0],[3,0],[4,1],[0,2],[4,2],[1,3],[2,3],[3,3],[4,3]],
+    "PULSAR":[[2,0],[3,0],[4,0],[8,0],[9,0],[10,0],[0,2],[5,2],[7,2],[12,2],[0,3],[5,3],[7,3],[12,3],[0,4],[5,4],[7,4],[12,4],[2,5],[3,5],[4,5],[8,5],[9,5],[10,5],[2,7],[3,7],[4,7],[8,7],[9,7],[10,7],[0,8],[5,8],[7,8],[12,8],[0,9],[5,9],[7,9],[12,9],[0,10],[5,10],[7,10],[12,10],[2,12],[3,12],[4,12],[8,12],[9,12],[10,12]],
+    "ACORN":[[1,0],[3,1],[0,2],[1,2],[4,2],[5,2],[6,2]],
+    "R-PENTOMINO":[[1,0],[2,0],[0,1],[1,1],[1,2]],
+    "GOSPER GUN":[[0,4],[0,5],[1,4],[1,5],[10,4],[10,5],[10,6],[11,3],[11,7],[12,2],[12,8],[13,2],[13,8],[14,5],[15,3],[15,7],[16,4],[16,5],[16,6],[17,5],[20,2],[20,3],[20,4],[21,2],[21,3],[21,4],[22,1],[22,5],[24,0],[24,1],[24,5],[24,6],[34,2],[34,3],[35,2],[35,3]],
+  };
+  const PNAMES=Object.keys(P);
+
+  function clearGrid(){ grid.fill(0); gen=0; }
+  function stampCentered(name){
+    clearGrid();
+    const pts=P[name]; let mx=0,my=0; for(const [x,y] of pts){ if(x>mx)mx=x; if(y>my)my=y; }
+    const ox=Math.floor((cols-mx)/2), oy=Math.floor((rows-my)/2);
+    // the gun reads better anchored toward the upper-left so its gliders cross the field
+    const gx = name==="GOSPER GUN" ? Math.floor(cols*0.12) : ox;
+    const gy = name==="GOSPER GUN" ? Math.floor(rows*0.12) : oy;
+    for(const [x,y] of pts){ const px=gx+x, py=gy+y; if(px>=0&&py>=0&&px<cols&&py<rows) grid[py*cols+px]=1; }
+  }
+  function randomize(){ for(let i=0;i<grid.length;i++) grid[i]=Math.random()<0.22?1:0; gen=0; }
+
+  /* ---------- the two rules ---------- */
+  let gen=0;
+  function stepLife(){
+    const w=cols,h=rows,W2=state.wrap;
+    for(let y=0;y<h;y++){
+      const ym=W2?(y-1+h)%h:y-1, yp=W2?(y+1)%h:y+1;
+      for(let x=0;x<w;x++){
+        const xm=W2?(x-1+w)%w:x-1, xp=W2?(x+1)%w:x+1;
+        let n=0;
+        if(ym>=0){ if(xm>=0)n+=grid[ym*w+xm]; n+=grid[ym*w+x]; if(xp<w)n+=grid[ym*w+xp]; }
+        if(xm>=0)n+=grid[y*w+xm]; if(xp<w)n+=grid[y*w+xp];
+        if(yp<h){ if(xm>=0)n+=grid[yp*w+xm]; n+=grid[yp*w+x]; if(xp<w)n+=grid[yp*w+xp]; }
+        const a=grid[y*w+x];
+        buf[y*w+x]=(a&&(n===2||n===3))||(!a&&n===3)?1:0;
+      }
+    }
+    const t=grid; grid=buf; buf=t; gen++;
+  }
+
+  /* ---------- render (phosphor persistence) ---------- */
+  function render(){
+    ctx.globalCompositeOperation="source-over";
+    ctx.fillStyle="rgba(4,8,10,0.32)"; ctx.fillRect(0,0,W,H);   // phosphor decay trail
+    ctx.fillStyle="#5dff9b"; ctx.shadowColor="#5dff9b"; ctx.shadowBlur=cell*0.6;
+    const r=Math.max(1,cell-1);
+    for(let y=0;y<rows;y++){ const row=y*cols, py=y*cell;
+      for(let x=0;x<cols;x++){ if(grid[row+x]) ctx.fillRect(x*cell, py, r, r); } }
+    ctx.shadowBlur=0;
+    document.getElementById("fgen").textContent="gen "+gen;
+  }
+
+  let paused=false, acc=0, last=performance.now();
+  function loop(now){
+    let dt=(now-last)/1000; last=now; if(dt>0.1)dt=0.1;
+    if(!paused){ acc+=dt; const stepT=1/state.speed; while(acc>=stepT){ stepLife(); acc-=stepT; } }
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- draw to toggle ---------- */
+  let drawing=false, drawVal=1;
+  function cellAt(e){ const x=Math.floor(e.clientX*dpr/cell), y=Math.floor(e.clientY*dpr/cell); if(x>=0&&y>=0&&x<cols&&y<rows) return y*cols+x; return -1; }
+  canvas.addEventListener("pointerdown",e=>{ drawing=true; const i=cellAt(e); if(i>=0){ drawVal=grid[i]?0:1; grid[i]=drawVal; } canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove",e=>{ if(!drawing)return; const i=cellAt(e); if(i>=0) grid[i]=drawVal; });
+  canvas.addEventListener("pointerup",()=>drawing=false);
+  canvas.addEventListener("pointercancel",()=>drawing=false);
+
+  /* ---------- UI ---------- */
+  const presetsHost=document.getElementById("presets"), slidersHost=document.getElementById("sliders"), foot=document.getElementById("fpreset");
+  PNAMES.forEach(n=>{ const c=document.createElement("button"); c.className="chip"; c.textContent=n; c.onclick=()=>{ stampCentered(n); foot.textContent=n; }; presetsHost.appendChild(c); });
+  const SLIDERS=[
+    {key:"speed",label:"Speed (gen/s)",min:1,max:40,step:1,fmt:v=>v|0},
+    {key:"cell",label:"Cell size",min:4,max:18,step:1,reseed:true,fmt:v=>(v|0)+"px"},
+  ];
+  const sEls={};
+  const sh=document.createElement("div"); sh.className="st"; sh.textContent="Tuning"; slidersHost.appendChild(sh);
+  SLIDERS.forEach(cfg=>{ const w=document.createElement("div"); w.className="ctrl";
+    w.innerHTML=`<div class="crow"><span class="cl">${cfg.label}</span><span class="cv" id="cv-${cfg.key}"></span></div>`;
+    const inp=document.createElement("input"); inp.type="range"; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=state[cfg.key];
+    inp.oninput=()=>{ state[cfg.key]=parseFloat(inp.value); upd(cfg,inp); if(cfg.reseed) resize(); };
+    w.appendChild(inp); slidersHost.appendChild(w); sEls[cfg.key]=inp; });
+  function upd(cfg,inp){ inp.style.setProperty("--fill",((inp.value-cfg.min)/(cfg.max-cfg.min)*100)+"%"); document.getElementById("cv-"+cfg.key).textContent=cfg.fmt(parseFloat(inp.value)); }
+  SLIDERS.forEach(cfg=>upd(cfg,sEls[cfg.key]));
+
+  const panel=document.getElementById("panel"), reopen=document.getElementById("reopen");
+  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); }
+  function setPaused(p){ paused=p; document.querySelector("#play span").textContent=paused?"Run":"Pause"; }
+  function save(){ const a=document.createElement("a"); a.download=`genesis-gen${gen}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
+  document.getElementById("play").onclick=()=>setPaused(!paused);
+  document.getElementById("step").onclick=()=>{ stepLife(); };
+  document.getElementById("rand").onclick=randomize;
+  document.getElementById("clear").onclick=()=>clearGrid();
+  document.getElementById("save").onclick=save;
+  document.getElementById("hide").onclick=()=>togglePanel(true);
+  document.getElementById("hide2").onclick=()=>togglePanel(true);
+  reopen.onclick=()=>togglePanel(false);
+  addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT")return; const k=e.key.toLowerCase();
+    if(k===" "){e.preventDefault();setPaused(!paused);} else if(k===".")stepLife(); else if(k==="r")randomize(); else if(k==="c")clearGrid(); else if(k==="s")save(); else if(k==="h")togglePanel(); });
+
+  /* ---------- boot ---------- */
+  resize();
+  stampCentered("GOSPER GUN");
+  requestAnimationFrame(loop);
+
+  if(location.search.includes("debug")) window.__pump=(k=120)=>{ for(let i=0;i<k;i++) stepLife(); render(); let a=0; for(let i=0;i<grid.length;i++) a+=grid[i]; return {gen, alive:a, grid:[cols,rows]}; };
+})();
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("../service-worker.js").catch(()=>{}));</script>
+</body>
+</html>

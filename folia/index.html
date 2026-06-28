@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>FOLIA — growth that folds in on itself</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="Folia — growth that folds in on itself" />
+<meta property="og:description" content="Differential growth buckling a curve into brain-coral folds — ink on warm paper. Part of ANIMA." />
+<meta property="og:image" content="../og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Folia — growth that folds in on itself" />
+<meta name="twitter:description" content="Differential growth buckling a curve into brain-coral folds — ink on warm paper. Part of ANIMA." />
+<meta name="twitter:image" content="../og-image.png" />
+
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     FOLIA — differential growth. Aesthetic: light herbarium plate.
+     The one bright world in the cabinet: ink on warm paper.
+     ============================================================ */
+  :root{
+    --paper:#efe7d6; --paper2:#e7dcc6; --ink:#241f17; --muted:#7d7363; --muted2:#a89c86;
+    --line:rgba(36,31,23,0.12); --line2:rgba(36,31,23,0.26);
+    --accent:#3f6b46; --accent2:#2f5235; --accentdim:rgba(63,107,70,0.10);
+    --disp:"Marcellus",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;background:var(--paper);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  canvas{position:fixed;inset:0;display:block;cursor:crosshair;}
+  .paper-tex{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0.5;mix-blend-mode:multiply;
+    background:radial-gradient(120% 120% at 50% 30%, transparent 60%, rgba(70,55,30,0.10) 100%);}
+
+  .mast{position:fixed;top:30px;left:38px;z-index:5;pointer-events:none;animation:fade 1.4s ease both;}
+  .mast h1{font-family:var(--disp);font-weight:400;font-size:44px;line-height:0.9;letter-spacing:0.04em;}
+  .mast .sub{font-size:10px;letter-spacing:0.34em;text-transform:uppercase;color:var(--muted);margin-top:10px;}
+
+  .panel{position:fixed;top:16px;right:16px;bottom:16px;width:308px;z-index:6;display:flex;flex-direction:column;
+    background:rgba(247,241,229,0.78);border:1px solid var(--line);border-radius:14px;
+    backdrop-filter:blur(16px) saturate(115%);-webkit-backdrop-filter:blur(16px) saturate(115%);
+    box-shadow:0 22px 60px rgba(60,45,20,0.18), inset 0 1px 0 rgba(255,255,255,0.5);
+    overflow:hidden;transition:transform .55s cubic-bezier(.16,1,.3,1),opacity .4s;animation:pin 1.2s .1s cubic-bezier(.16,1,.3,1) both;}
+  .panel.hidden{transform:translateX(calc(100% + 26px));opacity:0;pointer-events:none;}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:15px 17px 13px;border-bottom:1px solid var(--line);}
+  .head .t{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);}
+  .head .t span{color:var(--accent);}
+  .ib{width:25px;height:25px;display:grid;place-items:center;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;transition:all .18s;}
+  .ib:hover{color:var(--ink);border-color:var(--line2);}
+  .body{flex:1;overflow-y:auto;padding:4px 17px 16px;}
+  .body::-webkit-scrollbar{width:7px;}
+  .body::-webkit-scrollbar-thumb{background:rgba(36,31,23,0.14);border-radius:8px;}
+  .sec{padding:15px 0 3px;}
+  .sec+.sec{border-top:1px solid var(--line);}
+  .st{font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted2);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+  .st::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:9.5px;letter-spacing:0.07em;text-transform:uppercase;padding:7px 10px;border-radius:7px;border:1px solid var(--line);background:rgba(36,31,23,0.02);color:var(--muted);cursor:pointer;transition:all .16s;}
+  .chip:hover{color:var(--ink);border-color:var(--line2);}
+  .chip.on{color:#f3ecdc;background:var(--accent);border-color:var(--accent);font-weight:600;}
+
+  .ctrl{margin-bottom:14px;}
+  .crow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .cl{font-size:11px;color:var(--muted);}
+  .cv{font-size:11px;color:var(--accent2);font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer;}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,var(--accent) var(--fill,0%),rgba(36,31,23,0.16) var(--fill,0%));}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-5px;border-radius:50%;background:var(--paper);border:1.5px solid var(--accent);transition:box-shadow .18s;}
+  input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(63,107,70,0.14);}
+  input[type=range]::-moz-range-track{height:2px;background:rgba(36,31,23,0.16);border-radius:2px;}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--paper);border:1.5px solid var(--accent);}
+
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .btn{font-family:var(--mono);font-size:10px;letter-spacing:0.05em;padding:10px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(36,31,23,0.02);color:var(--ink);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn:hover{border-color:var(--line2);background:rgba(36,31,23,0.05);}
+  .btn:active{transform:translateY(1px);}
+  .btn.pri{border-color:var(--accent);color:var(--accent2);background:var(--accentdim);}
+  .btn kbd{font-size:8px;color:var(--muted2);border:1px solid var(--line);border-radius:4px;padding:1px 4px;}
+
+  .foot{flex:0 0 auto;padding:11px 17px;border-top:1px solid var(--line);font-size:9px;letter-spacing:0.1em;color:var(--muted2);display:flex;justify-content:space-between;}
+
+  .reopen{position:fixed;top:16px;right:16px;z-index:6;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(247,241,229,0.8);backdrop-filter:blur(12px);color:var(--accent);display:grid;place-items:center;cursor:pointer;font-size:16px;opacity:0;transform:scale(.85);pointer-events:none;transition:all .4s cubic-bezier(.16,1,.3,1);}
+  .reopen.show{opacity:1;transform:scale(1);pointer-events:auto;}
+
+  .hint{position:fixed;left:38px;bottom:26px;z-index:5;font-size:10px;letter-spacing:0.14em;line-height:1.9;color:var(--muted2);pointer-events:none;animation:fade 2s 0.8s ease both;}
+  .hint b{color:var(--muted);font-weight:400;}
+
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pin{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+  @media (max-width:740px){.panel{width:auto;left:12px;right:12px;top:auto;bottom:12px;height:54vh;}.hint{display:none}}
+</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="paper-tex"></div>
+
+  <style>
+    .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(36,31,23,0.5);text-decoration:none;padding:7px 15px;border:1px solid rgba(36,31,23,0.16);border-radius:100px;background:rgba(247,241,229,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:color .25s,border-color .25s,opacity .25s;opacity:0.7;}
+    .home-link:hover{color:#241f17;border-color:rgba(36,31,23,0.4);opacity:1;}
+  </style>
+  <a class="home-link" href="../index.html" title="back to the gallery">✦&nbsp;anima</a>
+
+  <div class="mast">
+    <h1>Folia</h1>
+    <div class="sub">growth that folds in on itself</div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <div class="head"><div class="t">HERBARIUM <span>/ console</span></div><button class="ib" id="hide">›</button></div>
+    <div class="body">
+      <div class="sec"><div class="st">Specimens</div><div class="chips" id="presets"></div></div>
+      <div class="sec"><div class="st">Ink</div><div class="chips" id="themes"></div></div>
+      <div class="sec" id="sliders"></div>
+      <div class="sec"><div class="st">Actions</div>
+        <div class="acts">
+          <button class="btn pri" id="pause"><span>Pause</span><kbd>Space</kbd></button>
+          <button class="btn" id="seed">Re-seed <kbd>N</kbd></button>
+          <button class="btn" id="clear">Clear <kbd>C</kbd></button>
+          <button class="btn" id="save">Save <kbd>S</kbd></button>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span id="fpreset">CORAL</span><span id="fcount">—</span></div>
+  </aside>
+  <button class="reopen" id="reopen">❀</button>
+
+  <div class="hint"><div><b>drag</b> to coax the growth</div><div><b>1–5</b> specimens &nbsp; <b>space</b> pause &nbsp; <b>N</b> re-seed</div></div>
+
+<script>
+"use strict";
+(() => {
+  const canvas=document.getElementById("c"), ctx=canvas.getContext("2d");
+  let W,H,dpr;
+  function resize(){ dpr=Math.min(devicePixelRatio||1,2); W=canvas.width=Math.floor(innerWidth*dpr); H=canvas.height=Math.floor(innerHeight*dpr); canvas.style.width=innerWidth+"px"; canvas.style.height=innerHeight+"px"; }
+
+  /* ---------- state ---------- */
+  const state={ repR:13, repF:1.1, attF:0.42, maxEdge:9, lineW:1.1, cap:6500, seeds:1, theme:0 };
+  const PRESETS={
+    CORAL:  {repR:13, repF:1.1, attF:0.42, maxEdge:9,  seeds:1},
+    BRAIN:  {repR:10, repF:1.2, attF:0.55, maxEdge:7,  seeds:1},
+    BLOOM:  {repR:18, repF:1.0, attF:0.30, maxEdge:14, seeds:1},
+    LICHEN: {repR:12, repF:1.1, attF:0.45, maxEdge:9,  seeds:6},
+    REEF:   {repR:14, repF:1.15,attF:0.40, maxEdge:10, seeds:3},
+  };
+  const PORDER=Object.keys(PRESETS);
+  const THEMES=[
+    {name:"Sepia",  ink:[36,31,23],   tip:[63,107,70]},
+    {name:"Indigo", ink:[28,34,58],   tip:[176,98,60]},
+    {name:"Wine",   ink:[64,24,34],   tip:[150,120,40]},
+    {name:"Forest", ink:[24,46,32],   tip:[180,120,50]},
+  ];
+  const SLIDERS=[
+    {key:"repR",   label:"Spread",     min:7,   max:24,  step:0.5, reseed:true, fmt:v=>v.toFixed(1)},
+    {key:"repF",   label:"Repulsion",  min:0.4, max:2.0, step:0.05,            fmt:v=>v.toFixed(2)},
+    {key:"attF",   label:"Cohesion",   min:0.1, max:0.8, step:0.01,            fmt:v=>v.toFixed(2)},
+    {key:"maxEdge",label:"Detail",     min:5,   max:18,  step:0.5,             fmt:v=>v.toFixed(1)},
+    {key:"lineW",  label:"Line weight",min:0.5, max:2.5, step:0.1,             fmt:v=>v.toFixed(1)},
+    {key:"cap",    label:"Max growth", min:1500,max:12000,step:500,            fmt:v=>(v/1000).toFixed(1)+"k"},
+  ];
+
+  /* ---------- differential growth ---------- */
+  let loops=[];   // each: array of {x,y,age}
+  function newLoop(cx,cy,r,n){ const a=[]; for(let i=0;i<n;i++){ const t=i/n*6.2831; a.push({x:cx+Math.cos(t)*r, y:cy+Math.sin(t)*r, age:0}); } return a; }
+  function seed(){
+    loops=[];
+    const k=state.seeds;
+    if(k===1){ loops.push(newLoop(W*0.5,H*0.5, 24*dpr, 40)); }
+    else { for(let i=0;i<k;i++){ loops.push(newLoop((0.2+Math.random()*0.6)*W,(0.25+Math.random()*0.5)*H, 14*dpr, 22)); } }
+    ctx.fillStyle=paperStyle(); ctx.fillRect(0,0,W,H);
+  }
+  function totalNodes(){ let n=0; for(const l of loops) n+=l.length; return n; }
+
+  // mouse attractor
+  let down=false, mx=0, my=0;
+  function setM(e){ mx=e.clientX*dpr; my=e.clientY*dpr; }
+  canvas.addEventListener("pointerdown",e=>{ down=true; setM(e); canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove",e=>{ if(down) setM(e); });
+  canvas.addEventListener("pointerup",()=>down=false);
+  canvas.addEventListener("pointercancel",()=>down=false);
+
+  function step(){
+    const repR=state.repR*dpr, repR2=repR*repR, repF=state.repF*dpr, springK=state.attF;
+    const restLen=state.maxEdge*dpr*0.55;
+    const maxStep=repR*0.45;
+    const grid=new Map(), cs=repR;
+    const key=(x,y)=> (Math.floor(x/cs))+","+(Math.floor(y/cs));
+    for(const l of loops) for(const nd of l){ const k=key(nd.x,nd.y); let b=grid.get(k); if(!b){b=[];grid.set(k,b);} b.push(nd); }
+
+    for(const l of loops){
+      const n=l.length;
+      for(let i=0;i<n;i++){
+        const nd=l[i], prev=l[(i-1+n)%n], next=l[(i+1)%n];
+        let fx=0, fy=0;
+        // rest-length springs hold each node to its path neighbours
+        const sx1=prev.x-nd.x, sy1=prev.y-nd.y, d1=Math.hypot(sx1,sy1);
+        if(d1>0.0001){ const f=(d1-restLen)*springK; fx+=sx1/d1*f; fy+=sy1/d1*f; }
+        const sx2=next.x-nd.x, sy2=next.y-nd.y, d2n=Math.hypot(sx2,sy2);
+        if(d2n>0.0001){ const f=(d2n-restLen)*springK; fx+=sx2/d2n*f; fy+=sy2/d2n*f; }
+        const gx=Math.floor(nd.x/cs), gy=Math.floor(nd.y/cs);
+        for(let ox=-1;ox<=1;ox++) for(let oy=-1;oy<=1;oy++){
+          const b=grid.get((gx+ox)+","+(gy+oy)); if(!b) continue;
+          for(const o of b){ if(o===nd||o===prev||o===next) continue; const dx=nd.x-o.x, dy=nd.y-o.y, d2=dx*dx+dy*dy;
+            if(d2>0 && d2<repR2){ const d=Math.sqrt(d2), push=(1-d/repR)*repF; fx+=dx/d*push; fy+=dy/d*push; } }
+        }
+        if(down){ const dx=mx-nd.x, dy=my-nd.y, d=Math.hypot(dx,dy); if(d<200*dpr && d>1){ const f=(1-d/(200*dpr))*1.6; fx+=dx/d*f; fy+=dy/d*f; } }
+        if(fx>maxStep)fx=maxStep; else if(fx<-maxStep)fx=-maxStep;
+        if(fy>maxStep)fy=maxStep; else if(fy<-maxStep)fy=-maxStep;
+        nd.fx=fx; nd.fy=fy;
+      }
+      for(let i=0;i<n;i++){ l[i].x+=l[i].fx; l[i].y+=l[i].fy; l[i].age++; }
+    }
+    // growth: stochastically split stretched edges so the perimeter
+    // outgrows the area it encloses and the curve must buckle into folds
+    if(totalNodes()<state.cap){
+      const thr=restLen*0.9, thr2=thr*thr, pGrow=0.06;
+      let budget=state.cap-totalNodes();
+      for(let li=0;li<loops.length && budget>0;li++){
+        const l=loops[li], n=l.length, out=[];
+        for(let i=0;i<n;i++){ const a=l[i], b=l[(i+1)%n]; out.push(a);
+          const dx=b.x-a.x, dy=b.y-a.y;
+          if(budget>0 && (dx*dx+dy*dy)>thr2 && Math.random()<pGrow){ out.push({x:(a.x+b.x)*0.5,y:(a.y+b.y)*0.5,age:0}); budget--; }
+        }
+        loops[li]=out;
+      }
+    }
+  }
+
+  /* ---------- render ---------- */
+  function paperStyle(){ return getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()||"#efe7d6"; }
+  function render(){
+    ctx.fillStyle=paperStyle(); ctx.fillRect(0,0,W,H);
+    const th=THEMES[state.theme], ink=th.ink, tip=th.tip;
+    ctx.lineJoin="round"; ctx.lineCap="round"; ctx.lineWidth=state.lineW*dpr;
+    // faint interior wash + ink outline
+    for(const l of loops){
+      if(l.length<3) continue;
+      ctx.beginPath(); ctx.moveTo(l[0].x,l[0].y);
+      for(let i=1;i<l.length;i++) ctx.lineTo(l[i].x,l[i].y);
+      ctx.closePath();
+      ctx.fillStyle=`rgba(${ink[0]},${ink[1]},${ink[2]},0.022)`; ctx.fill();
+      ctx.strokeStyle=`rgba(${ink[0]},${ink[1]},${ink[2]},0.62)`; ctx.stroke();
+    }
+    // growing tips in accent
+    ctx.fillStyle=`rgba(${tip[0]},${tip[1]},${tip[2]},0.85)`;
+    const growing=totalNodes()<state.cap;
+    if(growing){ for(const l of loops) for(const nd of l){ if(nd.age<26){ ctx.beginPath(); ctx.arc(nd.x,nd.y,1.5*dpr,0,6.2831); ctx.fill(); } } }
+    document.getElementById("fcount").textContent=totalNodes()+(growing?" · growing":" · settled");
+  }
+
+  let paused=false;
+  function loop(){ if(!paused){ step(); render(); } requestAnimationFrame(loop); }
+
+  let rt; addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{ resize(); seed(); },220); });
+
+  /* ---------- UI ---------- */
+  const presetsHost=document.getElementById("presets"),themesHost=document.getElementById("themes"),slidersHost=document.getElementById("sliders"),foot=document.getElementById("fpreset");
+  const sEls={};
+  function applyPreset(name){ Object.assign(state,PRESETS[name]); syncSliders(); [...presetsHost.children].forEach(c=>c.classList.toggle("on",c.textContent===name)); foot.textContent=name; seed(); }
+  PORDER.forEach(n=>{ const c=document.createElement("button"); c.className="chip"; c.textContent=n; c.onclick=()=>applyPreset(n); presetsHost.appendChild(c); });
+  THEMES.forEach((t,i)=>{ const c=document.createElement("button"); c.className="chip"+(i===state.theme?" on":""); c.textContent=t.name; c.onclick=()=>{ state.theme=i; [...themesHost.children].forEach((e,j)=>e.classList.toggle("on",j===i)); }; themesHost.appendChild(c); });
+
+  const sh=document.createElement("div"); sh.className="st"; sh.textContent="Form"; slidersHost.appendChild(sh);
+  SLIDERS.forEach(cfg=>{
+    const w=document.createElement("div"); w.className="ctrl";
+    w.innerHTML=`<div class="crow"><span class="cl">${cfg.label}</span><span class="cv" id="cv-${cfg.key}"></span></div>`;
+    const inp=document.createElement("input"); inp.type="range"; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=state[cfg.key];
+    inp.oninput=()=>{ state[cfg.key]=parseFloat(inp.value); upd(cfg,inp); if(!cfg.reseed){ foot.textContent="CUSTOM"; [...presetsHost.children].forEach(c=>c.classList.remove("on")); } };
+    if(cfg.reseed) inp.onchange=()=>{ seed(); };
+    w.appendChild(inp); slidersHost.appendChild(w); sEls[cfg.key]=inp;
+  });
+  function upd(cfg,inp){ inp.style.setProperty("--fill",((inp.value-cfg.min)/(cfg.max-cfg.min)*100)+"%"); document.getElementById("cv-"+cfg.key).textContent=cfg.fmt(parseFloat(inp.value)); }
+  function syncSliders(){ SLIDERS.forEach(cfg=>{ const i=sEls[cfg.key]; i.value=state[cfg.key]; upd(cfg,i); }); }
+
+  const panel=document.getElementById("panel"),reopen=document.getElementById("reopen");
+  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); }
+  function setPaused(p){ paused=p; document.querySelector("#pause span").textContent=paused?"Resume":"Pause"; }
+  function save(){ const a=document.createElement("a"); a.download=`folia-${Date.now()}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
+  document.getElementById("pause").onclick=()=>setPaused(!paused);
+  document.getElementById("seed").onclick=()=>seed();
+  function clearCanvas(){ loops=[]; ctx.fillStyle=paperStyle(); ctx.fillRect(0,0,W,H); }
+  document.getElementById("clear").onclick=clearCanvas;
+  document.getElementById("save").onclick=save;
+  document.getElementById("hide").onclick=()=>togglePanel(true);
+  reopen.onclick=()=>togglePanel(false);
+  addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT")return; const k=e.key.toLowerCase();
+    if(k===" "){e.preventDefault();setPaused(!paused);} else if(k==="n")seed(); else if(k==="c")clearCanvas(); else if(k==="s")save(); else if(k==="h")togglePanel();
+    else if(k>="1"&&k<="5"){ const i=+k-1; if(i<PORDER.length)applyPreset(PORDER[i]); } });
+
+  /* ---------- boot ---------- */
+  resize(); syncSliders(); applyPreset("CORAL");
+  requestAnimationFrame(loop);
+
+  if(location.search.includes("debug")) window.__pump=(k=600)=>{ for(let i=0;i<k;i++){ step(); } render(); return {nodes:totalNodes(),loops:loops.length}; };
+})();
+</script>
+<script src="../anima-nav.js" defer></script>
+</body>
+</html>

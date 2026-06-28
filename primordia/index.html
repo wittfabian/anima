@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PRIMORDIA — a particle life observatory</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="Primordia — emergent particle life" />
+<meta property="og:description" content="Coloured species pull and push through an editable matrix; out of nothing come cells, swarms and galaxies. Part of ANIMA." />
+<meta property="og:image" content="../og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Primordia — emergent particle life" />
+<meta name="twitter:description" content="Coloured species pull and push through an editable matrix; out of nothing come cells, swarms and galaxies. Part of ANIMA." />
+<meta name="twitter:image" content="../og-image.png" />
+
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     PRIMORDIA — emergent particle-life observatory
+     Aesthetic: scientific instrument / observatory
+     ============================================================ */
+
+  :root {
+    --bg:          #07070b;
+    --bg-2:        #0b0c12;
+    --panel:       rgba(15, 16, 22, 0.72);
+    --panel-solid: #0f1016;
+    --line:        rgba(255, 255, 255, 0.075);
+    --line-strong: rgba(255, 255, 255, 0.16);
+    --text:        #e9e9f0;
+    --muted:       #7d7d8c;
+    --muted-2:     #565663;
+    --accent:      #f4a428;
+    --accent-2:    #ffc164;
+    --accent-dim:  rgba(244, 164, 40, 0.14);
+    --pos:         70, 220, 150;
+    --neg:         245, 80, 95;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ---------- the universe ---------- */
+  #stage {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(120% 120% at 50% 0%, #0c0d14 0%, var(--bg) 55%, #050507 100%);
+  }
+  #sim {
+    position: absolute;
+    inset: 0;
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* atmospheric overlays — kept subtle so the simulation reads clearly */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(130% 110% at 50% 45%, transparent 55%, rgba(0,0,0,0.55) 100%);
+  }
+  .grain {
+    position: fixed;
+    inset: -50%;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- identity (top-left) ---------- */
+  .ident {
+    position: fixed;
+    top: 26px;
+    left: 30px;
+    z-index: 5;
+    pointer-events: none;
+    animation: rise 1.1s cubic-bezier(.16,1,.3,1) both;
+  }
+  .ident h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 30px;
+    letter-spacing: 0.42em;
+    line-height: 1;
+    text-indent: 0.42em;
+    color: var(--text);
+    text-shadow: 0 0 28px rgba(244,164,40,0.18);
+  }
+  .ident h1 .dot { color: var(--accent); }
+  .ident p {
+    margin-top: 9px;
+    font-size: 10.5px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-indent: 0.42em;
+  }
+
+  /* ---------- stats (bottom-left) ---------- */
+  .stats {
+    position: fixed;
+    bottom: 22px;
+    left: 30px;
+    z-index: 5;
+    display: flex;
+    gap: 26px;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--muted-2);
+    pointer-events: none;
+    animation: rise 1.1s 0.15s cubic-bezier(.16,1,.3,1) both;
+  }
+  .stats b {
+    display: block;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .stats .lab {
+    text-transform: uppercase;
+    color: var(--muted-2);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+  }
+
+  /* ---------- control panel ---------- */
+  .panel {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    bottom: 18px;
+    width: 332px;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    backdrop-filter: blur(22px) saturate(120%);
+    -webkit-backdrop-filter: blur(22px) saturate(120%);
+    box-shadow:
+      0 24px 70px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    overflow: hidden;
+    transition: transform 0.55s cubic-bezier(.16,1,.3,1), opacity 0.45s ease;
+    animation: panelIn 1.1s 0.1s cubic-bezier(.16,1,.3,1) both;
+  }
+  .panel.hidden {
+    transform: translateX(calc(100% + 28px));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
+  }
+  .panel__head .title {
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .panel__head .title span { color: var(--accent); }
+
+  .iconbtn {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.18s ease;
+  }
+  .iconbtn:hover { color: var(--text); border-color: var(--line-strong); background: rgba(255,255,255,0.04); }
+
+  .panel__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 18px 18px;
+  }
+  .panel__body::-webkit-scrollbar { width: 8px; }
+  .panel__body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.08);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .panel__body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); background-clip: content-box; }
+
+  .section { padding: 16px 0 4px; }
+  .section + .section { border-top: 1px solid var(--line); }
+  .section__title {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section__title::before {
+    content: "";
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* ---------- sliders ---------- */
+  .ctrl { margin-bottom: 15px; }
+  .ctrl__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 7px;
+  }
+  .ctrl__label {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .ctrl__val {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent-2);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 22px;
+    background: transparent;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 2px;
+    background: linear-gradient(to right, var(--accent) var(--fill, 0%), rgba(255,255,255,0.12) var(--fill, 0%));
+    border-radius: 2px;
+  }
+  input[type=range]::-moz-range-track {
+    height: 2px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+  }
+  input[type=range]::-moz-range-progress {
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 13px; height: 13px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: #15161d;
+    border: 1.5px solid var(--accent);
+    box-shadow: 0 0 0 3px rgba(244,164,40,0.0), 0 2px 6px rgba(0,0,0,0.5);
+    transition: box-shadow 0.18s ease, transform 0.1s ease;
+  }
+  input[type=range]:hover::-webkit-slider-thumb { box-shadow: 0 0 0 5px rgba(244,164,40,0.12), 0 2px 6px rgba(0,0,0,0.5); }
+  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.15); }
+  input[type=range]::-moz-range-thumb {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #15161d;
+    border: 1.5px solid var(--accent);
+  }
+
+  /* ---------- matrix ---------- */
+  .matrix-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .matrix {
+    display: grid;
+    gap: 3px;
+    width: 100%;
+  }
+  .mcell {
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    font-size: 8.5px;
+    color: rgba(255,255,255,0.55);
+    user-select: none;
+  }
+  .mcell.head {
+    background: transparent;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.0);
+  }
+  .mcell.swatch {
+    border-radius: 50%;
+  }
+  .mcell.edit {
+    cursor: ns-resize;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: border-color 0.15s ease;
+  }
+  .mcell.edit:hover { border-color: rgba(255,255,255,0.28); }
+  .matrix-hint {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--muted-2);
+    text-align: center;
+  }
+
+  /* ---------- chips & buttons ---------- */
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.015);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .chip:hover { color: var(--text); border-color: var(--line-strong); }
+  .chip.active {
+    color: #120c02;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+    box-shadow: 0 0 18px rgba(244,164,40,0.3);
+  }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    padding: 11px 10px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.02);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.16s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .btn:hover { border-color: var(--line-strong); background: rgba(255,255,255,0.05); }
+  .btn:active { transform: translateY(1px); }
+  .btn.wide { grid-column: 1 / -1; }
+  .btn.primary {
+    border-color: var(--accent);
+    color: var(--accent-2);
+    background: var(--accent-dim);
+  }
+  .btn.primary:hover { background: rgba(244,164,40,0.2); }
+  .btn kbd {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    color: var(--muted-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 4px;
+  }
+
+  .panel__foot {
+    flex: 0 0 auto;
+    padding: 12px 18px;
+    border-top: 1px solid var(--line);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--muted-2);
+    display: flex;
+    justify-content: space-between;
+  }
+  .panel__foot a { color: var(--muted); text-decoration: none; }
+
+  /* floating reopen button */
+  .reopen {
+    position: fixed;
+    top: 18px; right: 18px;
+    z-index: 6;
+    width: 42px; height: 42px;
+    border-radius: 11px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    backdrop-filter: blur(18px);
+    color: var(--accent);
+    display: grid; place-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0;
+    transform: scale(0.85);
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(.16,1,.3,1);
+  }
+  .reopen.show { opacity: 1; transform: scale(1); pointer-events: auto; }
+  .reopen:hover { border-color: var(--line-strong); }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%) translateY(14px);
+    z-index: 9;
+    padding: 9px 18px;
+    border-radius: 9px;
+    background: rgba(15,16,22,0.92);
+    border: 1px solid var(--line-strong);
+    backdrop-filter: blur(14px);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(.16,1,.3,1);
+    text-transform: uppercase;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast b { color: var(--accent); }
+
+  /* help overlay */
+  .help {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    background: rgba(5,5,8,0.7);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .help.show { opacity: 1; pointer-events: auto; }
+  .help__card {
+    width: min(440px, 90vw);
+    background: var(--panel-solid);
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    padding: 30px 34px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+  .help__card h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    margin-bottom: 6px;
+  }
+  .help__card h2 span { color: var(--accent); }
+  .help__card .sub { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }
+  .help__card p { font-size: 12px; line-height: 1.7; color: var(--muted); margin-bottom: 18px; }
+  .keys { display: grid; grid-template-columns: auto 1fr; gap: 9px 16px; font-size: 11.5px; }
+  .keys kbd {
+    font-family: var(--mono);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 2px 8px;
+    color: var(--accent-2);
+    justify-self: start;
+  }
+  .keys span { color: var(--muted); align-self: center; }
+  .help__close { margin-top: 24px; width: 100%; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes panelIn { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: translateX(0); } }
+
+  @media (max-width: 760px) {
+    .panel { width: auto; left: 12px; right: 12px; top: auto; bottom: 12px; height: 52vh; }
+    .ident { top: 16px; left: 18px; }
+    .stats { display: none; }
+  }
+</style>
+</head>
+<body>
+  <style>
+    .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,0.42);text-decoration:none;padding:7px 15px;border:1px solid rgba(255,255,255,0.12);border-radius:100px;background:rgba(10,10,12,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:color .25s,border-color .25s,opacity .25s;opacity:0.62;}
+    .home-link:hover{color:#fff;border-color:rgba(255,255,255,0.32);opacity:1;}
+  </style>
+  <a class="home-link" href="../index.html" title="back to the gallery">✦&nbsp;anima</a>
+  <div id="stage">
+    <canvas id="sim"></canvas>
+  </div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+
+  <div class="ident">
+    <h1>PRIMORDIA<span class="dot">.</span></h1>
+    <p>an emergent life observatory</p>
+  </div>
+
+  <div class="stats">
+    <div><span class="lab">Particles</span><b id="stat-n">0</b></div>
+    <div><span class="lab">Species</span><b id="stat-s">0</b></div>
+    <div><span class="lab">Frame</span><b id="stat-fps">0</b></div>
+  </div>
+
+  <!-- control panel -->
+  <aside class="panel" id="panel">
+    <div class="panel__head">
+      <div class="title">CONTROL <span>/ console</span></div>
+      <button class="iconbtn" id="btn-hide" title="Hide panel (H)">‹</button>
+    </div>
+    <div class="panel__body">
+
+      <div class="section">
+        <div class="section__title">Worlds</div>
+        <div class="chips" id="presets"></div>
+      </div>
+
+      <div class="section">
+        <div class="section__title">Interaction Matrix</div>
+        <div class="matrix-wrap">
+          <div class="matrix" id="matrix"></div>
+          <div class="matrix-hint">drag a cell ↕ &nbsp;·&nbsp; <span style="color:rgb(70,220,150)">attract</span> / <span style="color:rgb(245,80,95)">repel</span></div>
+        </div>
+      </div>
+
+      <div class="section" id="sliders"></div>
+
+      <div class="section">
+        <div class="section__title">Actions</div>
+        <div class="actions">
+          <button class="btn primary" id="btn-pause"><span>Pause</span> <kbd>Space</kbd></button>
+          <button class="btn" id="btn-reseed">Re-seed <kbd>N</kbd></button>
+          <button class="btn" id="btn-random">Randomize <kbd>R</kbd></button>
+          <button class="btn" id="btn-symm">Symmetrize</button>
+          <button class="btn wide" id="btn-snap">⤓ Save snapshot (PNG)</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="panel__foot">
+      <span id="foot-preset">GENESIS</span>
+      <a href="#" id="btn-help">? shortcuts</a>
+    </div>
+  </aside>
+
+  <button class="reopen" id="reopen" title="Show panel (H)">⚙</button>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- help -->
+  <div class="help" id="help">
+    <div class="help__card">
+      <h2>PRIMORDIA<span>.</span></h2>
+      <div class="sub">field manual</div>
+      <p>A few simple rules of attraction and repulsion between coloured species. No design, no goal — just physics. Watch cells, swarms, chasers and galaxies emerge on their own. Drag the matrix to rewrite the laws of this universe.</p>
+      <div class="keys">
+        <kbd>Space</kbd><span>pause / resume time</span>
+        <kbd>R</kbd><span>randomize the interaction matrix</span>
+        <kbd>N</kbd><span>re-seed all particles</span>
+        <kbd>H</kbd><span>hide / show the console</span>
+        <kbd>S</kbd><span>save a snapshot (PNG)</span>
+        <kbd>F</kbd><span>toggle fullscreen</span>
+        <kbd>1–7</kbd><span>jump to a preset world</span>
+        <kbd>drag</kbd><span>on canvas — pull particles · right-drag pushes</span>
+      </div>
+      <button class="btn primary help__close" id="help-close">Begin observing</button>
+    </div>
+  </div>
+
+<script>
+"use strict";
+(() => {
+
+  /* ============================================================
+     STATE
+     ============================================================ */
+  const state = {
+    particleCount: 1500,
+    numTypes:      6,
+    rMax:          0.085,   // interaction radius (normalized space)
+    forceFactor:   8,
+    friction:      0.86,    // 0 = slippery, 1 = damped (mapped to half-life)
+    beta:          0.30,    // inner repulsion zone
+    speed:         1,       // time scale
+    trails:        0.10,    // canvas fade alpha (low = long trails)
+    size:          1.6,     // particle core radius (px @ dpr 1)
+    glow:          0.55,    // halo strength
+  };
+
+  const SLIDERS = [
+    { key:"particleCount", label:"Particles",          min:200,  max:4000, step:50,    reseed:true,  fmt:v=>v|0 },
+    { key:"numTypes",      label:"Species",             min:1,    max:9,    step:1,     rebuild:true, fmt:v=>v|0 },
+    { key:"rMax",          label:"Interaction radius",  min:0.02, max:0.30, step:0.005, grid:true,    fmt:v=>v.toFixed(3) },
+    { key:"forceFactor",   label:"Force",               min:0,    max:30,   step:0.5,                 fmt:v=>v.toFixed(1) },
+    { key:"friction",      label:"Friction",            min:0,    max:1,    step:0.01,                fmt:v=>v.toFixed(2) },
+    { key:"beta",          label:"Repulsion zone",      min:0.05, max:0.45, step:0.01,                fmt:v=>v.toFixed(2) },
+    { key:"speed",         label:"Time scale",          min:0.1,  max:3,    step:0.1,                 fmt:v=>v.toFixed(1)+"×" },
+    { key:"trails",        label:"Trails",              min:0.02, max:1,    step:0.01,                fmt:v=>v.toFixed(2) },
+    { key:"size",          label:"Particle size",       min:0.5,  max:4,    step:0.1,                 fmt:v=>v.toFixed(1) },
+    { key:"glow",          label:"Glow",                min:0,    max:1,    step:0.05,                fmt:v=>v.toFixed(2) },
+  ];
+
+  // luminous palette, designed to sit on black with additive glow
+  const PALETTE = [
+    [255, 93, 115],   // coral
+    [255, 209, 102],  // amber
+    [ 60, 222, 160],  // mint
+    [ 76, 201, 240],  // sky
+    [183, 148, 246],  // violet
+    [247, 140, 107],  // ember
+    [152, 245, 225],  // ice
+    [255, 158, 216],  // rose
+    [198, 255, 143],  // lime
+  ];
+
+  /* ============================================================
+     SIMULATION BUFFERS
+     ============================================================ */
+  let posX, posY, velX, velY, types;          // particle arrays (normalized 0..1)
+  let matrix;                                  // matrix[i][j] force coefficient
+  let n = 0;
+
+  // spatial grid (linked-list buckets) for neighbour queries
+  let gridCols = 1, cellHead = null, cellNext = null;
+
+  /* ============================================================
+     CANVAS
+     ============================================================ */
+  const canvas = document.getElementById("sim");
+  const ctx = canvas.getContext("2d", { alpha: false });
+  let W = 0, H = 0, dpr = 1;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.floor(window.innerWidth * dpr);
+    H = Math.floor(window.innerHeight * dpr);
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    // repaint background so trails don't carry stale frame
+    ctx.fillStyle = "#07070b";
+    ctx.fillRect(0, 0, W, H);
+  }
+  window.addEventListener("resize", resize);
+
+  /* ============================================================
+     MATRIX & PARTICLE SETUP
+     ============================================================ */
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+  function makeMatrix(generator) {
+    const m = state.numTypes;
+    matrix = [];
+    for (let i = 0; i < m; i++) {
+      matrix[i] = [];
+      for (let j = 0; j < m; j++) matrix[i][j] = generator(i, j, m);
+    }
+  }
+
+  function reseed() {
+    n = state.particleCount;
+    posX = new Float32Array(n);
+    posY = new Float32Array(n);
+    velX = new Float32Array(n);
+    velY = new Float32Array(n);
+    types = new Int8Array(n);
+    cellNext = new Int32Array(n);
+    for (let i = 0; i < n; i++) {
+      posX[i] = Math.random();
+      posY[i] = Math.random();
+      velX[i] = 0;
+      velY[i] = 0;
+      types[i] = (Math.random() * state.numTypes) | 0;
+    }
+    rebuildGrid();
+  }
+
+  function rebuildGrid() {
+    gridCols = Math.max(3, Math.floor(1 / state.rMax));
+    cellHead = new Int32Array(gridCols * gridCols);
+  }
+
+  /* ============================================================
+     PHYSICS
+     ============================================================ */
+  function force(r, a) {
+    const beta = state.beta;
+    if (r < beta) return r / beta - 1;            // close-range repulsion
+    if (r < 1)    return a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta));
+    return 0;
+  }
+
+  // pointer interaction
+  let pointerActive = false, pointerBtn = 0, mx = 0.5, my = 0.5;
+  const MOUSE_R = 0.13, MOUSE_F = 7;
+
+  function step() {
+    const rMax = state.rMax;
+    const cols = gridCols;
+    const dt = 0.018 * state.speed;
+    const halfLife = 0.20 - state.friction * 0.19;          // 0.20 → 0.01
+    const frictionFactor = Math.pow(0.5, dt / halfLife);
+    const scale = rMax * state.forceFactor;
+
+    // build spatial grid
+    cellHead.fill(-1);
+    for (let i = 0; i < n; i++) {
+      let cx = (posX[i] * cols) | 0; if (cx >= cols) cx = cols - 1; if (cx < 0) cx = 0;
+      let cy = (posY[i] * cols) | 0; if (cy >= cols) cy = cols - 1; if (cy < 0) cy = 0;
+      const c = cy * cols + cx;
+      cellNext[i] = cellHead[c];
+      cellHead[c] = i;
+    }
+
+    // accumulate forces → update velocities (positions read-only here)
+    for (let i = 0; i < n; i++) {
+      const xi = posX[i], yi = posY[i], ti = types[i];
+      const mrow = matrix[ti];
+      let fx = 0, fy = 0;
+
+      let cx = (xi * cols) | 0; if (cx >= cols) cx = cols - 1; if (cx < 0) cx = 0;
+      let cy = (yi * cols) | 0; if (cy >= cols) cy = cols - 1; if (cy < 0) cy = 0;
+
+      for (let gy = -1; gy <= 1; gy++) {
+        const ny = ((cy + gy) % cols + cols) % cols;
+        for (let gx = -1; gx <= 1; gx++) {
+          const nx = ((cx + gx) % cols + cols) % cols;
+          let j = cellHead[ny * cols + nx];
+          while (j !== -1) {
+            if (j !== i) {
+              let dx = posX[j] - xi;
+              let dy = posY[j] - yi;
+              if (dx >  0.5) dx -= 1; else if (dx < -0.5) dx += 1;   // toroidal wrap
+              if (dy >  0.5) dy -= 1; else if (dy < -0.5) dy += 1;
+              const d2 = dx * dx + dy * dy;
+              if (d2 > 0 && d2 < rMax * rMax) {
+                const d = Math.sqrt(d2);
+                const f = force(d / rMax, mrow[types[j]]);
+                fx += (dx / d) * f;
+                fy += (dy / d) * f;
+              }
+            }
+            j = cellNext[j];
+          }
+        }
+      }
+
+      fx *= scale;
+      fy *= scale;
+
+      // pointer well
+      if (pointerActive) {
+        let dx = mx - xi, dy = my - yi;
+        if (dx >  0.5) dx -= 1; else if (dx < -0.5) dx += 1;
+        if (dy >  0.5) dy -= 1; else if (dy < -0.5) dy += 1;
+        const d = Math.hypot(dx, dy);
+        if (d > 0 && d < MOUSE_R) {
+          const s = MOUSE_F * (1 - d / MOUSE_R) * (pointerBtn === 2 ? -1 : 1);
+          fx += (dx / d) * s;
+          fy += (dy / d) * s;
+        }
+      }
+
+      velX[i] = velX[i] * frictionFactor + fx * dt;
+      velY[i] = velY[i] * frictionFactor + fy * dt;
+    }
+
+    // integrate positions
+    for (let i = 0; i < n; i++) {
+      let x = posX[i] + velX[i] * dt;
+      let y = posY[i] + velY[i] * dt;
+      x -= Math.floor(x);   // wrap to [0,1)
+      y -= Math.floor(y);
+      posX[i] = x;
+      posY[i] = y;
+    }
+  }
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
+  function render() {
+    // fade previous frame for motion trails
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = `rgba(7, 7, 11, ${state.trails})`;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.globalCompositeOperation = "lighter";
+    const coreR = state.size * dpr;
+    const haloR = coreR * (2.2 + state.glow * 2.5);
+    const m = state.numTypes;
+
+    // halo pass (grouped by species to minimise state changes)
+    if (state.glow > 0.01) {
+      const ha = 0.05 + state.glow * 0.10;
+      for (let t = 0; t < m; t++) {
+        const c = PALETTE[t];
+        ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${ha})`;
+        ctx.beginPath();
+        for (let i = 0; i < n; i++) {
+          if (types[i] !== t) continue;
+          const x = posX[i] * W, y = posY[i] * H;
+          ctx.moveTo(x + haloR, y);
+          ctx.arc(x, y, haloR, 0, 6.2832);
+        }
+        ctx.fill();
+      }
+    }
+
+    // core pass
+    for (let t = 0; t < m; t++) {
+      const c = PALETTE[t];
+      ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.95)`;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        if (types[i] !== t) continue;
+        const x = posX[i] * W, y = posY[i] * H;
+        ctx.moveTo(x + coreR, y);
+        ctx.arc(x, y, coreR, 0, 6.2832);
+      }
+      ctx.fill();
+    }
+
+    // pointer ring
+    if (pointerActive) {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = pointerBtn === 2 ? "rgba(245,80,95,0.5)" : "rgba(244,164,40,0.5)";
+      ctx.lineWidth = 1.5 * dpr;
+      ctx.beginPath();
+      ctx.arc(mx * W, my * H, MOUSE_R * Math.min(W, H), 0, 6.2832);
+      ctx.stroke();
+    }
+  }
+
+  /* ============================================================
+     MAIN LOOP
+     ============================================================ */
+  let paused = false;
+  let lastFpsT = performance.now(), frames = 0, fps = 0;
+
+  function loop(t) {
+    if (!paused) step();
+    render();
+
+    frames++;
+    if (t - lastFpsT >= 500) {
+      fps = Math.round(frames * 1000 / (t - lastFpsT));
+      frames = 0; lastFpsT = t;
+      statFps.textContent = fps;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  /* ============================================================
+     PRESETS — each defines a matrix generator + param overrides
+     ============================================================ */
+  const PRESETS = {
+    GENESIS: {
+      gen: () => rand(-1, 1),
+      params: { rMax:0.085, forceFactor:8, friction:0.86, trails:0.10 },
+    },
+    CELLS: {
+      gen: (i, j) => i === j ? rand(0.7, 1.0) : rand(-0.9, -0.2),
+      params: { rMax:0.07, forceFactor:9, friction:0.84, trails:0.10 },
+    },
+    SNAKES: {
+      gen: (i, j, m) => i === j ? -0.3 : (j === (i + 1) % m ? rand(0.7, 1.0) : rand(-0.3, 0.0)),
+      params: { rMax:0.075, forceFactor:9, friction:0.82, trails:0.07 },
+    },
+    HUNT: {
+      gen: (i, j, m) => {
+        if (j === (i + 1) % m) return 1.0;        // chase the next species
+        if (j === (i - 1 + m) % m) return -1.0;   // flee the previous
+        if (i === j) return 0.3;
+        return rand(-0.2, 0.2);
+      },
+      params: { rMax:0.10, forceFactor:10, friction:0.80, trails:0.06 },
+    },
+    GALAXIES: {
+      gen: (i, j) => i === j ? rand(0.5, 0.8) : rand(0.1, 0.5),
+      params: { rMax:0.16, forceFactor:6, friction:0.92, trails:0.05 },
+    },
+    CRYSTALS: {
+      gen: (i, j) => i === j ? 1.0 : -1.0,
+      params: { rMax:0.06, forceFactor:10, friction:0.88, trails:0.18 },
+    },
+    SYMBIOSIS: {
+      gen: () => 0,   // filled symmetrically below
+      params: { rMax:0.10, forceFactor:8, friction:0.85, trails:0.08 },
+      post: () => {
+        const m = state.numTypes;
+        for (let i = 0; i < m; i++)
+          for (let j = i; j < m; j++) {
+            const v = rand(-1, 1);
+            matrix[i][j] = v; matrix[j][i] = v;
+          }
+      },
+    },
+  };
+  const PRESET_ORDER = Object.keys(PRESETS);
+
+  function applyPreset(name, doReseed = true) {
+    const p = PRESETS[name];
+    if (!p) return;
+    Object.assign(state, p.params);
+    makeMatrix(p.gen);
+    if (p.post) p.post();
+    rebuildGrid();
+    if (doReseed) reseed();
+    syncSliders();
+    buildMatrixUI();
+    foot.textContent = name;
+    document.querySelectorAll("#presets .chip").forEach(el =>
+      el.classList.toggle("active", el.dataset.name === name));
+    statS.textContent = state.numTypes;
+    statN.textContent = state.particleCount;
+  }
+
+  /* ============================================================
+     UI BUILDERS
+     ============================================================ */
+  const slidersHost = document.getElementById("sliders");
+  const matrixHost  = document.getElementById("matrix");
+  const presetsHost = document.getElementById("presets");
+  const foot        = document.getElementById("foot-preset");
+  const statN = document.getElementById("stat-n");
+  const statS = document.getElementById("stat-s");
+  const statFps = document.getElementById("stat-fps");
+
+  const sliderEls = {};
+
+  function buildSliders() {
+    const head = document.createElement("div");
+    head.className = "section__title";
+    head.textContent = "Parameters";
+    slidersHost.appendChild(head);
+
+    SLIDERS.forEach(cfg => {
+      const wrap = document.createElement("div");
+      wrap.className = "ctrl";
+      wrap.innerHTML = `
+        <div class="ctrl__row">
+          <span class="ctrl__label">${cfg.label}</span>
+          <span class="ctrl__val" id="val-${cfg.key}"></span>
+        </div>`;
+      const input = document.createElement("input");
+      input.type = "range";
+      input.min = cfg.min; input.max = cfg.max; input.step = cfg.step;
+      input.value = state[cfg.key];
+      input.addEventListener("input", () => {
+        state[cfg.key] = parseFloat(input.value);
+        updateSliderVisual(cfg, input);
+        if (cfg.rebuild) {
+          // species count changed: rebuild matrix & particles
+          makeMatrix(() => rand(-1, 1));
+          rebuildGrid();
+          reseed();
+          buildMatrixUI();
+          statS.textContent = state.numTypes;
+          foot.textContent = "CUSTOM";
+        } else if (cfg.reseed) {
+          reseed();
+          statN.textContent = state.particleCount;
+        } else if (cfg.grid) {
+          rebuildGrid();
+        }
+      });
+      wrap.appendChild(input);
+      slidersHost.appendChild(wrap);
+      sliderEls[cfg.key] = input;
+    });
+    syncSliders();
+  }
+
+  function updateSliderVisual(cfg, input) {
+    const pct = (input.value - cfg.min) / (cfg.max - cfg.min) * 100;
+    input.style.setProperty("--fill", pct + "%");
+    document.getElementById("val-" + cfg.key).textContent = cfg.fmt(state[cfg.key]);
+  }
+
+  function syncSliders() {
+    SLIDERS.forEach(cfg => {
+      const input = sliderEls[cfg.key];
+      if (!input) return;
+      input.value = state[cfg.key];
+      updateSliderVisual(cfg, input);
+    });
+  }
+
+  // matrix value → colour
+  function valColor(v) {
+    if (v > 0) return `rgba(${[60,222,160]},${0.1 + v * 0.6})`;
+    if (v < 0) return `rgba(${[245,80,95]},${0.1 + (-v) * 0.6})`;
+    return "rgba(255,255,255,0.04)";
+  }
+
+  function buildMatrixUI() {
+    const m = state.numTypes;
+    matrixHost.innerHTML = "";
+    matrixHost.style.gridTemplateColumns = `repeat(${m + 1}, 1fr)`;
+    const showNum = m <= 6;
+
+    // header row
+    const corner = document.createElement("div");
+    corner.className = "mcell head";
+    matrixHost.appendChild(corner);
+    for (let j = 0; j < m; j++) {
+      const c = PALETTE[j];
+      const cell = document.createElement("div");
+      cell.className = "mcell swatch";
+      cell.style.background = `rgb(${c[0]},${c[1]},${c[2]})`;
+      cell.style.boxShadow = `0 0 8px rgba(${c[0]},${c[1]},${c[2]},0.5)`;
+      matrixHost.appendChild(cell);
+    }
+
+    for (let i = 0; i < m; i++) {
+      const c = PALETTE[i];
+      const rowhead = document.createElement("div");
+      rowhead.className = "mcell swatch";
+      rowhead.style.background = `rgb(${c[0]},${c[1]},${c[2]})`;
+      rowhead.style.boxShadow = `0 0 8px rgba(${c[0]},${c[1]},${c[2]},0.5)`;
+      matrixHost.appendChild(rowhead);
+
+      for (let j = 0; j < m; j++) {
+        const cell = document.createElement("div");
+        cell.className = "mcell edit";
+        cell.dataset.i = i; cell.dataset.j = j;
+        cell.style.background = valColor(matrix[i][j]);
+        if (showNum) cell.textContent = matrix[i][j].toFixed(1);
+        cell.title = `species ${i+1} ← ${j+1}: ${matrix[i][j].toFixed(2)}`;
+        attachMatrixDrag(cell);
+        matrixHost.appendChild(cell);
+      }
+    }
+  }
+
+  function attachMatrixDrag(cell) {
+    cell.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      const i = +cell.dataset.i, j = +cell.dataset.j;
+      const startY = e.clientY, startV = matrix[i][j];
+      const showNum = state.numTypes <= 6;
+      const move = (ev) => {
+        const v = clamp(startV - (ev.clientY - startY) * 0.006, -1, 1);
+        matrix[i][j] = v;
+        cell.style.background = valColor(v);
+        if (showNum) cell.textContent = v.toFixed(1);
+        cell.title = `species ${i+1} ← ${j+1}: ${v.toFixed(2)}`;
+        foot.textContent = "CUSTOM";
+        document.querySelectorAll("#presets .chip").forEach(el => el.classList.remove("active"));
+      };
+      const up = () => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
+  }
+
+  function buildPresets() {
+    PRESET_ORDER.forEach((name) => {
+      const chip = document.createElement("button");
+      chip.className = "chip";
+      chip.textContent = name;
+      chip.dataset.name = name;
+      chip.addEventListener("click", () => applyPreset(name));
+      presetsHost.appendChild(chip);
+    });
+  }
+
+  /* ============================================================
+     POINTER ON CANVAS
+     ============================================================ */
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("pointerdown", (e) => {
+    pointerActive = true; pointerBtn = e.button;
+    mx = e.clientX / window.innerWidth; my = e.clientY / window.innerHeight;
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    mx = e.clientX / window.innerWidth; my = e.clientY / window.innerHeight;
+  });
+  const endPointer = () => { pointerActive = false; };
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+
+  /* ============================================================
+     ACTIONS & SHORTCUTS
+     ============================================================ */
+  const panel = document.getElementById("panel");
+  const reopen = document.getElementById("reopen");
+  const toast = document.getElementById("toast");
+  let toastT = null;
+  function showToast(html) {
+    toast.innerHTML = html;
+    toast.classList.add("show");
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove("show"), 1600);
+  }
+
+  function togglePanel(force) {
+    const hide = force !== undefined ? force : !panel.classList.contains("hidden");
+    panel.classList.toggle("hidden", hide);
+    reopen.classList.toggle("show", hide);
+  }
+
+  function setPaused(p) {
+    paused = p;
+    document.querySelector("#btn-pause span").textContent = paused ? "Resume" : "Pause";
+  }
+
+  function snapshot() {
+    const a = document.createElement("a");
+    a.download = `primordia-${Date.now()}.png`;
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+    showToast("snapshot <b>saved</b>");
+  }
+
+  document.getElementById("btn-pause").addEventListener("click", () => setPaused(!paused));
+  document.getElementById("btn-reseed").addEventListener("click", () => { reseed(); showToast("particles <b>re-seeded</b>"); });
+  document.getElementById("btn-random").addEventListener("click", () => {
+    makeMatrix(() => rand(-1, 1));
+    buildMatrixUI();
+    foot.textContent = "CUSTOM";
+    document.querySelectorAll("#presets .chip").forEach(el => el.classList.remove("active"));
+    showToast("matrix <b>randomized</b>");
+  });
+  document.getElementById("btn-symm").addEventListener("click", () => {
+    const m = state.numTypes;
+    for (let i = 0; i < m; i++)
+      for (let j = i + 1; j < m; j++) matrix[j][i] = matrix[i][j];
+    buildMatrixUI();
+    showToast("matrix <b>symmetrized</b>");
+  });
+  document.getElementById("btn-snap").addEventListener("click", snapshot);
+  document.getElementById("btn-hide").addEventListener("click", () => togglePanel(true));
+  reopen.addEventListener("click", () => togglePanel(false));
+
+  const help = document.getElementById("help");
+  document.getElementById("btn-help").addEventListener("click", (e) => { e.preventDefault(); help.classList.add("show"); });
+  document.getElementById("help-close").addEventListener("click", () => help.classList.remove("show"));
+  help.addEventListener("click", (e) => { if (e.target === help) help.classList.remove("show"); });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT") return;
+    const k = e.key.toLowerCase();
+    if (k === " ")        { e.preventDefault(); setPaused(!paused); showToast(paused ? "<b>paused</b>" : "<b>resumed</b>"); }
+    else if (k === "r")   { document.getElementById("btn-random").click(); }
+    else if (k === "n")   { reseed(); showToast("particles <b>re-seeded</b>"); }
+    else if (k === "h")   { togglePanel(); }
+    else if (k === "s")   { snapshot(); }
+    else if (k === "f")   { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+    else if (k === "?")   { help.classList.toggle("show"); }
+    else if (k >= "1" && k <= "9") {
+      const idx = +k - 1;
+      if (idx < PRESET_ORDER.length) applyPreset(PRESET_ORDER[idx]);
+    }
+  });
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  resize();
+  buildPresets();
+  buildSliders();
+  applyPreset("GENESIS");
+  statN.textContent = state.particleCount;
+  statS.textContent = state.numTypes;
+  requestAnimationFrame(loop);
+
+  // open with the field manual the first time
+  setTimeout(() => help.classList.add("show"), 700);
+
+})();
+</script>
+<script src="../anima-nav.js" defer></script>
+</body>
+</html>

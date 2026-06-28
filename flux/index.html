@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>FLUX — liquid light</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="Flux — liquid light" />
+<meta property="og:description" content="Thousands of agents trace a Perlin flow field into silk and aurora. Part of ANIMA, a cabinet of living things." />
+<meta property="og:image" content="../og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Flux — liquid light" />
+<meta name="twitter:description" content="Thousands of agents trace a Perlin flow field into silk and aurora. Part of ANIMA, a cabinet of living things." />
+<meta name="twitter:image" content="../og-image.png" />
+
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     FLUX — flow-field silk. Aesthetic: gallery / painterly.
+     ============================================================ */
+  :root {
+    --bg: #060608;
+    --ink: #f2efe9;
+    --muted: rgba(242,239,233,0.45);
+    --faint: rgba(242,239,233,0.16);
+    --accent: #e7c873;
+    --serif: "Cormorant Garamond", Georgia, serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--ink); cursor:crosshair; }
+  canvas { position:fixed; inset:0; display:block; }
+
+  /* identity */
+  .mast {
+    position:fixed; top:34px; left:40px; z-index:5; pointer-events:none;
+    animation: fade 1.6s ease both;
+  }
+  .mast h1 {
+    font-family:var(--serif); font-weight:300; font-style:italic;
+    font-size:54px; line-height:0.9; letter-spacing:0.02em;
+    text-shadow:0 2px 40px rgba(0,0,0,0.6);
+  }
+  .mast .sub {
+    font-family:var(--mono); font-size:10px; letter-spacing:0.46em;
+    text-transform:uppercase; color:var(--muted); margin-top:10px; margin-left:3px;
+  }
+
+  /* placard (bottom bar) */
+  .placard {
+    position:fixed; left:50%; bottom:30px; transform:translateX(-50%);
+    z-index:6; display:flex; align-items:center; gap:22px;
+    padding:13px 22px; border-radius:100px;
+    background:rgba(12,12,16,0.55); border:1px solid var(--faint);
+    backdrop-filter:blur(20px) saturate(120%); -webkit-backdrop-filter:blur(20px) saturate(120%);
+    box-shadow:0 18px 50px rgba(0,0,0,0.5);
+    font-family:var(--mono); font-size:11px;
+    transition:opacity .6s ease, transform .6s ease;
+    animation: rise 1.4s .2s cubic-bezier(.16,1,.3,1) both;
+  }
+  .placard.dim { opacity:0; transform:translateX(-50%) translateY(16px); pointer-events:none; }
+
+  .pname { font-family:var(--serif); font-style:italic; font-size:20px; min-width:118px; letter-spacing:0.01em; }
+  .swatches { display:flex; gap:7px; }
+  .sw { width:15px; height:15px; border-radius:50%; cursor:pointer; opacity:0.5; transition:all .2s ease; border:1px solid rgba(255,255,255,0.12); }
+  .sw:hover { opacity:0.9; transform:scale(1.12); }
+  .sw.on { opacity:1; transform:scale(1.18); box-shadow:0 0 0 2px rgba(255,255,255,0.18); }
+
+  .div { width:1px; height:22px; background:var(--faint); }
+
+  .ctrls { display:flex; align-items:center; gap:14px; color:var(--muted); }
+  .ico { cursor:pointer; color:var(--muted); transition:color .2s ease; font-size:14px; user-select:none; letter-spacing:0.05em; }
+  .ico:hover { color:var(--ink); }
+
+  .hint {
+    position:fixed; right:40px; bottom:34px; z-index:5;
+    font-family:var(--mono); font-size:10px; letter-spacing:0.18em; line-height:2;
+    color:var(--faint); text-align:right; pointer-events:none;
+    animation: fade 2s 1s ease both;
+  }
+  .hint b { color:var(--muted); font-weight:400; }
+
+  @keyframes fade { from{opacity:0} to{opacity:1} }
+  @keyframes rise { from{opacity:0; transform:translateX(-50%) translateY(18px)} to{opacity:1; transform:translateX(-50%) translateY(0)} }
+  @media (max-width:680px){ .mast h1{font-size:38px} .hint{display:none} }
+</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <style>
+    .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,0.42);text-decoration:none;padding:7px 15px;border:1px solid rgba(255,255,255,0.12);border-radius:100px;background:rgba(10,10,12,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:color .25s,border-color .25s,opacity .25s;opacity:0.62;}
+    .home-link:hover{color:#fff;border-color:rgba(255,255,255,0.32);opacity:1;}
+  </style>
+  <a class="home-link" href="../index.html" title="back to the gallery">✦&nbsp;anima</a>
+
+  <div class="mast">
+    <h1>Flux</h1>
+    <div class="sub">liquid light · a flow field</div>
+  </div>
+
+  <div class="placard" id="placard">
+    <span class="pname" id="pname">Aurora</span>
+    <div class="swatches" id="swatches"></div>
+    <div class="div"></div>
+    <div class="ctrls">
+      <span class="ico" id="ic-pause" title="pause (space)">❚❚</span>
+      <span class="ico" id="ic-reseed" title="reshape the field (R)">↻</span>
+      <span class="ico" id="ic-clear" title="clear (C)">✕</span>
+      <span class="ico" id="ic-save" title="save image (S)">⤓</span>
+      <span class="ico" id="ic-hide" title="hide UI (H)">◎</span>
+    </div>
+  </div>
+
+  <div class="hint">
+    <div><b>drag</b> to stir the current</div>
+    <div><b>click</b> to bloom</div>
+    <div><b>1–6</b> palettes &nbsp; <b>space</b> pause</div>
+  </div>
+
+<script>
+"use strict";
+(() => {
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d", { alpha:false });
+  let W, H, dpr;
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio||1, 2);
+    W = canvas.width  = Math.floor(innerWidth*dpr);
+    H = canvas.height = Math.floor(innerHeight*dpr);
+    canvas.style.width = innerWidth+"px";
+    canvas.style.height = innerHeight+"px";
+    ctx.fillStyle = "#060608"; ctx.fillRect(0,0,W,H);
+  }
+  addEventListener("resize", resize);
+
+  /* ---------- Perlin noise (classic, 2D) + fbm ---------- */
+  const perm = new Uint8Array(512);
+  (function seedPerm(){
+    const p = new Uint8Array(256);
+    for(let i=0;i<256;i++) p[i]=i;
+    for(let i=255;i>0;i--){ const j=(Math.random()*(i+1))|0; const t=p[i]; p[i]=p[j]; p[j]=t; }
+    for(let i=0;i<512;i++) perm[i]=p[i&255];
+  })();
+  const fade = t => t*t*t*(t*(t*6-15)+10);
+  const lerp = (a,b,t) => a+(b-a)*t;
+  function grad(h,x,y){ switch(h&3){case 0:return x+y;case 1:return -x+y;case 2:return x-y;default:return -x-y;} }
+  function noise2(x,y){
+    const X=Math.floor(x)&255, Y=Math.floor(y)&255;
+    x-=Math.floor(x); y-=Math.floor(y);
+    const u=fade(x), v=fade(y);
+    const aa=perm[perm[X]+Y], ab=perm[perm[X]+Y+1], ba=perm[perm[X+1]+Y], bb=perm[perm[X+1]+Y+1];
+    return lerp(lerp(grad(aa,x,y),grad(ba,x-1,y),u), lerp(grad(ab,x,y-1),grad(bb,x-1,y-1),u), v);
+  }
+  function fbm(x,y){
+    let v=0, a=0.5, f=1;
+    for(let i=0;i<4;i++){ v += a*noise2(x*f,y*f); f*=2; a*=0.5; }
+    return v;
+  }
+
+  /* ---------- palettes ---------- */
+  const PALETTES = {
+    Aurora:   { blend:"lighter", fade:0.012, alpha:0.045, stops:[[28,49,84],[58,166,185],[120,255,196],[180,255,140],[245,255,210]] },
+    Ember:    { blend:"lighter", fade:0.014, alpha:0.040, stops:[[40,10,12],[140,28,30],[230,90,40],[255,170,70],[255,235,170]] },
+    Ink:      { blend:"source-over", fade:0.010, alpha:0.060, stops:[[8,12,28],[30,52,110],[70,110,190],[150,180,225],[235,240,250]] },
+    Spectrum: { blend:"lighter", fade:0.013, alpha:0.038, stops:[[255,60,120],[255,180,60],[120,230,90],[60,200,220],[150,110,255]] },
+    Bloom:    { blend:"source-over", fade:0.009, alpha:0.055, stops:[[26,8,30],[120,30,90],[220,70,140],[255,150,170],[255,225,210]] },
+    Mono:     { blend:"lighter", fade:0.016, alpha:0.035, stops:[[10,10,12],[70,72,80],[140,142,150],[210,212,218],[255,255,255]] },
+  };
+  const PNAMES = Object.keys(PALETTES);
+  let pal = "Aurora";
+
+  function sample(stops, t){
+    t = t<0?0:t>1?1:t;
+    const n = stops.length-1, s = t*n, i = Math.min(n-1, s|0), f = s-i;
+    const a = stops[i], b = stops[i+1];
+    return [ a[0]+(b[0]-a[0])*f|0, a[1]+(b[1]-a[1])*f|0, a[2]+(b[2]-a[2])*f|0 ];
+  }
+
+  /* ---------- particles ---------- */
+  let N = 2600;
+  let px, py, ph;   // position + a per-particle "colour seed" carried along
+  function spawn(i){
+    px[i] = Math.random()*W; py[i] = Math.random()*H; ph[i] = Math.random();
+  }
+  function initParticles(){
+    px=new Float32Array(N); py=new Float32Array(N); ph=new Float32Array(N);
+    for(let i=0;i<N;i++) spawn(i);
+  }
+
+  /* ---------- field + state ---------- */
+  let t = 0, ox = 0, oy = 0;          // field time + offset (reseed shifts these)
+  const SCALE = 0.0016;               // spatial frequency of the field
+  let paused = false;
+  let speed = 1;
+
+  // pointer stir
+  let stir = false, sx=0, sy=0, spx=0, spy=0, sBloom=0;
+
+  function step(){
+    const P = PALETTES[pal];
+    // gentle fade keeps it an evolving painting rather than saturating
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = `rgba(6,6,8,${P.fade})`;
+    ctx.fillRect(0,0,W,H);
+
+    ctx.globalCompositeOperation = P.blend;
+    ctx.lineWidth = 1.15*dpr;
+
+    const sp = 1.6*dpr*speed;
+    const tt = t*0.00018;
+
+    for(let i=0;i<N;i++){
+      const x=px[i], y=py[i];
+      // flow angle from animated fbm
+      const a = fbm((x+ox)*SCALE, (y+oy)*SCALE + tt) * 3.14159 * 3.0;
+      let vx = Math.cos(a)*sp, vy = Math.sin(a)*sp;
+
+      // pointer stir: swirl + pull toward cursor, plus radial bloom on click
+      if(stir || sBloom>0.01){
+        const dx=sx-x, dy=sy-y, d=Math.hypot(dx,dy)+0.001;
+        const R = 220*dpr;
+        if(d<R){
+          const fall=(1-d/R);
+          if(stir){ vx += (-dy/d)*fall*4*dpr + (spx)*fall*0.25; vy += (dx/d)*fall*4*dpr + (spy)*fall*0.25; }
+          if(sBloom>0.01){ vx += (dx/d)*fall*sBloom*7*dpr; vy += (dy/d)*fall*sBloom*7*dpr; }
+        }
+      }
+
+      const nx=x+vx, ny=y+vy;
+      // colour from a slow secondary field so neighbours agree → coherent regions
+      const ct = (fbm((x+ox)*SCALE*0.6 + 11.3, (y+oy)*SCALE*0.6 + tt*0.7) + 1)*0.5;
+      const c = sample(P.stops, (ct*0.8 + ph[i]*0.2));
+      ctx.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${P.alpha})`;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(nx,ny); ctx.stroke();
+
+      px[i]=nx; py[i]=ny;
+      // respawn when out of bounds or occasionally (keeps the field fresh)
+      if(nx< -5||nx>W+5||ny< -5||ny>H+5 || Math.random()<0.0008) spawn(i);
+    }
+    sBloom *= 0.92;
+    spx*=0.8; spy*=0.8;
+    t += 16*speed;
+  }
+
+  function loop(){
+    if(!paused) step();
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- UI ---------- */
+  const placard = document.getElementById("placard");
+  const pnameEl = document.getElementById("pname");
+  const swHost = document.getElementById("swatches");
+
+  function buildSwatches(){
+    swHost.innerHTML="";
+    PNAMES.forEach((name,idx)=>{
+      const s=document.createElement("div");
+      s.className="sw"+(name===pal?" on":"");
+      const mid = PALETTES[name].stops[3];
+      const lo = PALETTES[name].stops[1];
+      s.style.background = `linear-gradient(135deg, rgb(${lo}) 0%, rgb(${mid}) 100%)`;
+      s.title = name+" ("+(idx+1)+")";
+      s.onclick=()=>setPalette(name);
+      swHost.appendChild(s);
+    });
+  }
+  function setPalette(name){
+    pal=name; pnameEl.textContent=name;
+    [...swHost.children].forEach(el=>el.classList.toggle("on", el.title.startsWith(name)));
+  }
+
+  function clearCanvas(){ ctx.globalCompositeOperation="source-over"; ctx.fillStyle="#060608"; ctx.fillRect(0,0,W,H); }
+  function reseed(){ ox=(Math.random()-0.5)*4000; oy=(Math.random()-0.5)*4000; (function r(){const p=new Uint8Array(256);for(let i=0;i<256;i++)p[i]=i;for(let i=255;i>0;i--){const j=(Math.random()*(i+1))|0;const tmp=p[i];p[i]=p[j];p[j]=tmp;}for(let i=0;i<512;i++)perm[i]=p[i&255];})(); }
+  function save(){ const a=document.createElement("a"); a.download=`flux-${Date.now()}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
+  function togglePause(){ paused=!paused; document.getElementById("ic-pause").textContent = paused?"▶":"❚❚"; }
+  let hidden=false;
+  function toggleHide(){ hidden=!hidden; placard.classList.toggle("dim",hidden); document.querySelector(".mast").style.opacity=hidden?0:1; document.querySelector(".hint").style.opacity=hidden?0:1; }
+
+  document.getElementById("ic-pause").onclick=togglePause;
+  document.getElementById("ic-reseed").onclick=reseed;
+  document.getElementById("ic-clear").onclick=clearCanvas;
+  document.getElementById("ic-save").onclick=save;
+  document.getElementById("ic-hide").onclick=toggleHide;
+
+  addEventListener("keydown",e=>{
+    const k=e.key.toLowerCase();
+    if(k===" "){e.preventDefault();togglePause();}
+    else if(k==="r") reseed();
+    else if(k==="c") clearCanvas();
+    else if(k==="s") save();
+    else if(k==="h") toggleHide();
+    else if(k>="1"&&k<="6"){ const i=+k-1; if(i<PNAMES.length) setPalette(PNAMES[i]); }
+  });
+
+  /* pointer */
+  function pos(e){ sx=e.clientX*dpr; sy=e.clientY*dpr; }
+  canvas.addEventListener("pointerdown",e=>{ stir=true; spx=spy=0; pos(e); sBloom=1; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove",e=>{ const ox2=sx, oy2=sy; pos(e); spx=sx-ox2; spy=sy-oy2; });
+  canvas.addEventListener("pointerup",()=>{ stir=false; });
+  canvas.addEventListener("pointercancel",()=>{ stir=false; });
+
+  /* boot */
+  resize();
+  initParticles();
+  buildSwatches();
+  reseed();
+  requestAnimationFrame(loop);
+
+  // headless verification hook (inert unless ?debug is present)
+  if (location.search.includes("debug")) window.__pump = (k=200)=>{ for(let i=0;i<k;i++) step(); };
+})();
+</script>
+<script src="../anima-nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ANIMALCULA — small living things</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="Animalcula — small living things" />
+<meta property="og:description" content="SmoothLife continuous cellular automata: soft cells that glide and divide out of noise. The flagship of ANIMA." />
+<meta property="og:image" content="../og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Animalcula — small living things" />
+<meta name="twitter:description" content="SmoothLife continuous cellular automata: soft cells that glide and divide out of noise. The flagship of ANIMA." />
+<meta name="twitter:image" content="../og-image.png" />
+
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     ANIMALCULA — SmoothLife (continuous cellular automata).
+     Aesthetic: fluorescence microscopy / dark field, violet stain.
+     ============================================================ */
+  :root{
+    --bg:#06040c; --ink:#ece8f4; --muted:#8a82a0; --muted2:#5a5470;
+    --line:rgba(200,180,255,0.08); --line2:rgba(200,180,255,0.20);
+    --accent:#b98cff; --accent2:#d9c2ff; --accentdim:rgba(185,140,255,0.13);
+    --disp:"Spectral",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  canvas{position:fixed;inset:0;display:block;cursor:crosshair;}
+
+  .mast{position:fixed;top:28px;left:34px;z-index:5;pointer-events:none;animation:fade 1.4s ease both;}
+  .mast h1{font-family:var(--disp);font-weight:300;font-size:40px;line-height:0.9;letter-spacing:0.06em;}
+  .mast h1 b{color:var(--accent);font-weight:300;}
+  .mast .sub{font-size:10px;letter-spacing:0.34em;text-transform:uppercase;color:var(--muted);margin-top:10px;}
+
+  .panel{position:fixed;top:16px;right:16px;bottom:16px;width:312px;z-index:6;display:flex;flex-direction:column;
+    background:rgba(11,8,18,0.76);border:1px solid var(--line);border-radius:15px;
+    backdrop-filter:blur(20px) saturate(120%);-webkit-backdrop-filter:blur(20px) saturate(120%);
+    box-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,180,255,0.05);
+    overflow:hidden;transition:transform .55s cubic-bezier(.16,1,.3,1),opacity .4s;animation:pin 1.2s .1s cubic-bezier(.16,1,.3,1) both;}
+  .panel.hidden{transform:translateX(calc(100% + 26px));opacity:0;pointer-events:none;}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:15px 17px 13px;border-bottom:1px solid var(--line);}
+  .head .t{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);}
+  .head .t span{color:var(--accent);}
+  .ib{width:25px;height:25px;display:grid;place-items:center;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;transition:all .18s;}
+  .ib:hover{color:var(--ink);border-color:var(--line2);}
+  .body{flex:1;overflow-y:auto;padding:4px 17px 16px;}
+  .body::-webkit-scrollbar{width:7px;}
+  .body::-webkit-scrollbar-thumb{background:rgba(200,180,255,0.1);border-radius:8px;}
+  .sec{padding:15px 0 3px;}
+  .sec+.sec{border-top:1px solid var(--line);}
+  .st{font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted2);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+  .st::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:9.5px;letter-spacing:0.07em;text-transform:uppercase;padding:7px 10px;border-radius:7px;border:1px solid var(--line);background:rgba(200,180,255,0.015);color:var(--muted);cursor:pointer;transition:all .16s;}
+  .chip:hover{color:var(--ink);border-color:var(--line2);}
+  .chip.on{color:#160a26;background:var(--accent);border-color:var(--accent);font-weight:600;box-shadow:0 0 16px rgba(185,140,255,0.3);}
+
+  .ctrl{margin-bottom:14px;}
+  .crow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .cl{font-size:11px;color:var(--muted);}
+  .cv{font-size:11px;color:var(--accent2);font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer;}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,var(--accent) var(--fill,0%),rgba(200,180,255,0.13) var(--fill,0%));}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-5px;border-radius:50%;background:#140a22;border:1.5px solid var(--accent);transition:box-shadow .18s;}
+  input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(185,140,255,0.12);}
+  input[type=range]::-moz-range-track{height:2px;background:rgba(200,180,255,0.13);border-radius:2px;}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#140a22;border:1.5px solid var(--accent);}
+
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .btn{font-family:var(--mono);font-size:10px;letter-spacing:0.05em;padding:10px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(200,180,255,0.02);color:var(--ink);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn:hover{border-color:var(--line2);background:rgba(200,180,255,0.05);}
+  .btn:active{transform:translateY(1px);}
+  .btn.pri{border-color:var(--accent);color:var(--accent2);background:var(--accentdim);}
+  .btn kbd{font-size:8px;color:var(--muted2);border:1px solid var(--line);border-radius:4px;padding:1px 4px;}
+
+  .foot{flex:0 0 auto;padding:11px 17px;border-top:1px solid var(--line);font-size:9px;letter-spacing:0.1em;color:var(--muted2);display:flex;justify-content:space-between;}
+
+  .reopen{position:fixed;top:16px;right:16px;z-index:6;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(11,8,18,0.76);backdrop-filter:blur(16px);color:var(--accent);display:grid;place-items:center;cursor:pointer;font-size:16px;opacity:0;transform:scale(.85);pointer-events:none;transition:all .4s cubic-bezier(.16,1,.3,1);}
+  .reopen.show{opacity:1;transform:scale(1);pointer-events:auto;}
+
+  .hint{position:fixed;left:34px;bottom:26px;z-index:5;font-size:10px;letter-spacing:0.14em;line-height:1.9;color:var(--muted2);pointer-events:none;animation:fade 2s 0.8s ease both;}
+  .hint b{color:var(--muted);font-weight:400;}
+
+  .err{position:fixed;inset:0;display:none;place-items:center;z-index:30;background:rgba(6,4,12,0.92);padding:40px;text-align:center;}
+  .err.show{display:grid;}
+  .err div{max-width:440px;font-size:13px;line-height:1.7;color:var(--muted);}
+  .err b{color:var(--accent);font-family:var(--disp);font-size:20px;display:block;margin-bottom:14px;}
+
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pin{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+  @media (max-width:740px){.panel{width:auto;left:12px;right:12px;top:auto;bottom:12px;height:54vh;}.hint{display:none}}
+</style>
+</head>
+<body>
+  <canvas id="c" role="img" aria-label="A live SmoothLife culture — soft cellular organisms emerging from noise under a dark-field microscope"></canvas>
+
+  <style>
+    .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,0.42);text-decoration:none;padding:7px 15px;border:1px solid rgba(255,255,255,0.12);border-radius:100px;background:rgba(10,10,12,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:color .25s,border-color .25s,opacity .25s;opacity:0.62;}
+    .home-link:hover{color:#fff;border-color:rgba(255,255,255,0.32);opacity:1;}
+  </style>
+  <a class="home-link" href="../index.html" title="back to the gallery">✦&nbsp;anima</a>
+
+  <div class="mast">
+    <h1>ANIMAL<b>CULA</b></h1>
+    <div class="sub">small living things · smoothlife</div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <div class="head"><div class="t">CULTURE <span>/ console</span></div><button class="ib" id="hide">›</button></div>
+    <div class="body">
+      <div class="sec"><div class="st">Cultures</div><div class="chips" id="presets"></div></div>
+      <div class="sec"><div class="st">Stain</div><div class="chips" id="themes"></div></div>
+      <div class="sec" id="sliders"></div>
+      <div class="sec"><div class="st">Actions</div>
+        <div class="acts">
+          <button class="btn pri" id="pause"><span>Pause</span><kbd>Space</kbd></button>
+          <button class="btn" id="seed">Re-seed <kbd>N</kbd></button>
+          <button class="btn" id="clear">Clear <kbd>C</kbd></button>
+          <button class="btn" id="save">Save <kbd>S</kbd></button>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span id="fpreset">GLIDERS</span><span id="fcount">smoothlife</span></div>
+  </aside>
+  <button class="reopen" id="reopen">⚙</button>
+
+  <div class="hint"><div><b>drag</b> to inoculate the dish</div><div><b>1–4</b> cultures &nbsp; <b>space</b> pause &nbsp; <b>N</b> re-seed</div></div>
+
+  <div class="err" id="err"><div><b>No WebGL2</b>ANIMALCULA needs WebGL2 with float render targets. Try a recent Chrome, Firefox or Safari with hardware acceleration.</div></div>
+
+<script>
+"use strict";
+(() => {
+  const canvas=document.getElementById("c");
+  const gl=canvas.getContext("webgl2",{antialias:false,preserveDrawingBuffer:true});
+  if(!gl || !gl.getExtension("EXT_color_buffer_float")){ document.getElementById("err").classList.add("show"); return; }
+  // Use full 32-bit float only where linear filtering of it is supported; otherwise
+  // fall back to 16-bit float (whose linear filtering is core in WebGL2) so the
+  // simulation still filters smoothly on GPUs without OES_texture_float_linear.
+  const SFMT = gl.getExtension("OES_texture_float_linear") ? gl.RGBA32F : gl.RGBA16F;
+
+  /* ---------- state ---------- */
+  // SmoothLife (Rafler) glider rule, with curated culture variations.
+  // The birth/death thresholds are fixed rule constants; presets vary scale (ra) + time (dt).
+  const RULE = { b1:0.257, b2:0.336, d1:0.365, d2:0.549, an:0.028, am:0.147 };
+  const state={ ra:11, dt:0.10, gain:1.0, brush:26, theme:0 };
+  const PRESETS={
+    GLIDERS: {ra:11, dt:0.10},
+    SWARM:   {ra:9,  dt:0.23},
+    CORAL:   {ra:13, dt:0.12},
+    FRENZY:  {ra:7,  dt:0.42},
+  };
+  const PORDER=Object.keys(PRESETS);
+  // cosine palettes (IQ): col = a + b*cos(2pi*(c*t + d)) — fluorescent stains
+  const THEMES=[
+    {name:"Fluoro", a:[0.18,0.10,0.28], b:[0.50,0.45,0.55], c:[1.0,1.0,1.0], d:[0.60,0.45,0.30]},
+    {name:"Viridis",a:[0.10,0.20,0.16], b:[0.45,0.50,0.40], c:[1.0,1.0,1.0], d:[0.35,0.20,0.10]},
+    {name:"Cyan",   a:[0.08,0.18,0.22], b:[0.40,0.48,0.52], c:[1.0,1.0,1.0], d:[0.50,0.45,0.40]},
+    {name:"Ember",  a:[0.22,0.12,0.10], b:[0.52,0.42,0.36], c:[1.0,1.0,1.0], d:[0.05,0.12,0.20]},
+    {name:"Mono",   a:[0.5,0.5,0.5],    b:[0.5,0.5,0.5],    c:[1.0,1.0,1.0], d:[0.0,0.0,0.0]},
+  ];
+  const SLIDERS=[
+    {key:"dt",    label:"Metabolism", min:0.04, max:0.6, step:0.01, fmt:v=>v.toFixed(2)},
+    {key:"ra",    label:"Cell size",  min:6,    max:13,  step:0.5,  fmt:v=>v.toFixed(1)},
+    {key:"gain",  label:"Luminosity", min:0.5,  max:2.5, step:0.05, fmt:v=>v.toFixed(2)},
+    {key:"brush", label:"Pipette",    min:8,    max:70,  step:1,    fmt:v=>v|0},
+  ];
+
+  /* ---------- gl helpers ---------- */
+  function sh(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) console.error("shader:",gl.getShaderInfoLog(s),src); return s; }
+  function prog(vs,fs){ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) console.error("link:",gl.getProgramInfoLog(p)); return p; }
+  const VS=`#version 300 es
+  in vec2 p; out vec2 v_uv; void main(){ v_uv=p*0.5+0.5; gl_Position=vec4(p,0.,1.); }`;
+
+  const SIM_FS=`#version 300 es
+  precision highp float;
+  uniform sampler2D u_tex; uniform vec2 u_texel;
+  uniform float u_ri,u_ra,u_aa,u_b1,u_b2,u_d1,u_d2,u_an,u_am,u_dt;
+  uniform vec2 u_mouse; uniform float u_mr,u_mamt;
+  in vec2 v_uv; out vec4 o;
+  const int MAXR=14;
+  float sg(float x,float a,float al){ return 1.0/(1.0+exp(-(x-a)*4.0/al)); }
+  void main(){
+    float ra=u_ra, ri=u_ri, aa=u_aa;
+    float M=0.0,Mn=0.0,N=0.0,Nn=0.0;
+    for(int dy=-MAXR;dy<=MAXR;dy++){
+      if(abs(float(dy))>ra+aa) continue;   // skip whole rows outside the kernel
+      for(int dx=-MAXR;dx<=MAXR;dx++){
+        float d=length(vec2(float(dx),float(dy)));
+        if(d>ra+aa) continue;
+        float val=texture(u_tex, v_uv+vec2(float(dx),float(dy))*u_texel).r;
+        float inner=1.0-smoothstep(ri-aa,ri+aa,d);
+        float outer=smoothstep(ri-aa,ri+aa,d)*(1.0-smoothstep(ra-aa,ra+aa,d));
+        M+=val*inner; Mn+=inner; N+=val*outer; Nn+=outer;
+      }
+    }
+    float m=M/max(Mn,1e-6), n=N/max(Nn,1e-6);
+    float am=sg(m,0.5,u_am);
+    float aliveT=mix(u_b1,u_d1,am);
+    float deadT =mix(u_b2,u_d2,am);
+    float s=sg(n,aliveT,u_an)*(1.0-sg(n,deadT,u_an));
+    float a=texture(u_tex,v_uv).r;
+    float val=a + u_dt*(2.0*s-1.0);
+    if(u_mouse.x>=0.0){ float dd=distance(gl_FragCoord.xy,u_mouse); if(dd<u_mr) val += u_mamt*smoothstep(u_mr,0.0,dd); }
+    o=vec4(clamp(val,0.0,1.0),0.0,0.0,1.0);
+  }`;
+
+  const DISP_FS=`#version 300 es
+  precision highp float;
+  uniform sampler2D u_tex; uniform vec2 u_texel; uniform float u_gain,u_aspect;
+  uniform vec3 pa,pb,pc,pd;
+  in vec2 v_uv; out vec4 o;
+  vec3 pal(float t){ return pa+pb*cos(6.28318*(pc*t+pd)); }
+  void main(){
+    float v=texture(u_tex,v_uv).r;
+    float t=clamp(v*u_gain,0.0,1.0);
+    // soft rim from local gradient for a wet, cellular sheen
+    float gx=texture(u_tex,v_uv+vec2(u_texel.x,0.)).r-texture(u_tex,v_uv-vec2(u_texel.x,0.)).r;
+    float gy=texture(u_tex,v_uv+vec2(0.,u_texel.y)).r-texture(u_tex,v_uv-vec2(0.,u_texel.y)).r;
+    float rim=clamp(length(vec2(gx,gy))*6.0,0.0,1.0);
+    vec3 col=pal(pow(t,0.85));
+    col=col*(0.25+0.95*t) + rim*0.18;
+    // dark-field microscope vignette (circular field of view)
+    vec2 q=(v_uv-0.5); q.x*=u_aspect; float r=length(q);
+    col *= 1.0 - smoothstep(0.46,0.72,r)*0.85;
+    o=vec4(col,1.0);
+  }`;
+
+  const simProg=prog(VS,SIM_FS), dispProg=prog(VS,DISP_FS);
+  const quad=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,quad); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  function bindQuad(p){ const l=gl.getAttribLocation(p,"p"); gl.enableVertexAttribArray(l); gl.bindBuffer(gl.ARRAY_BUFFER,quad); gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0); }
+
+  /* ---------- textures (ping-pong) ---------- */
+  let simW,simH,texA,texB,fboA,fboB;
+  function mkTex(){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,SFMT,simW,simH,0,gl.RGBA,gl.FLOAT,null);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT); return t; }
+  function mkFbo(t){ const f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0); return f; }
+  function alloc(){
+    // release any previous resources so resizes/rotations don't leak VRAM
+    if(texA){ gl.deleteTexture(texA); gl.deleteTexture(texB); gl.deleteFramebuffer(fboA); gl.deleteFramebuffer(fboB); }
+    const LONG = matchMedia("(hover: none)").matches ? 480 : 720;   // lighter kernel load on touch GPUs
+    const asp=innerWidth/innerHeight;
+    if(asp>=1){ simW=LONG; simH=Math.max(2,Math.round(LONG/asp)); } else { simH=LONG; simW=Math.max(2,Math.round(LONG*asp)); }
+    texA=mkTex(); fboA=mkFbo(texA); texB=mkTex(); fboB=mkFbo(texB); }
+  function seed(){
+    const d=new Float32Array(simW*simH*4);
+    // inoculate a central region with smooth random blots
+    const blots=60;
+    for(let k=0;k<blots;k++){
+      const cx=(0.22+Math.random()*0.56)*simW|0, cy=(0.22+Math.random()*0.56)*simH|0, rr=(8+Math.random()*22)|0, amp=0.6+Math.random()*0.4;
+      for(let y=-rr;y<=rr;y++)for(let x=-rr;x<=rr;x++){ const px=cx+x,py=cy+y; if(px<0||py<0||px>=simW||py>=simH)continue;
+        if(x*x+y*y>rr*rr)continue; const i=(py*simW+px)*4; d[i]=Math.min(1,d[i]+amp*Math.random()); d[i+3]=1; } }
+    gl.bindTexture(gl.TEXTURE_2D,texA); gl.texImage2D(gl.TEXTURE_2D,0,SFMT,simW,simH,0,gl.RGBA,gl.FLOAT,d);
+    gl.bindTexture(gl.TEXTURE_2D,texB); gl.texImage2D(gl.TEXTURE_2D,0,SFMT,simW,simH,0,gl.RGBA,gl.FLOAT,d);
+  }
+  function clearDish(){ for(const f of [fboA,fboB]){ gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);} }
+
+  const SU={}; ["u_tex","u_texel","u_ri","u_ra","u_aa","u_b1","u_b2","u_d1","u_d2","u_an","u_am","u_dt","u_mouse","u_mr","u_mamt"].forEach(k=>SU[k]=gl.getUniformLocation(simProg,k));
+  const DU={}; ["u_tex","u_texel","u_gain","u_aspect","pa","pb","pc","pd"].forEach(k=>DU[k]=gl.getUniformLocation(dispProg,k));
+
+  /* ---------- pointer ---------- */
+  let down=false,mpx=-1,mpy=-1;
+  function setM(e){ mpx=e.clientX/innerWidth*simW; mpy=(1-e.clientY/innerHeight)*simH; }
+  canvas.addEventListener("pointerdown",e=>{ down=true; setM(e); canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove",e=>{ if(down) setM(e); });
+  canvas.addEventListener("pointerup",()=>down=false);
+  canvas.addEventListener("pointercancel",()=>down=false);
+  canvas.addEventListener("contextmenu",e=>e.preventDefault());
+
+  let read=null,readF=null,write=null,writeF=null;
+  function simStep(){
+    gl.useProgram(simProg); bindQuad(simProg);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,writeF); gl.viewport(0,0,simW,simH);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,read); gl.uniform1i(SU.u_tex,0);
+    gl.uniform2f(SU.u_texel,1/simW,1/simH);
+    gl.uniform1f(SU.u_ra,state.ra); gl.uniform1f(SU.u_ri,state.ra/3.0); gl.uniform1f(SU.u_aa,1.0);
+    gl.uniform1f(SU.u_b1,RULE.b1); gl.uniform1f(SU.u_b2,RULE.b2); gl.uniform1f(SU.u_d1,RULE.d1); gl.uniform1f(SU.u_d2,RULE.d2);
+    gl.uniform1f(SU.u_an,RULE.an); gl.uniform1f(SU.u_am,RULE.am); gl.uniform1f(SU.u_dt,state.dt);
+    gl.uniform1f(SU.u_mr,state.brush); gl.uniform1f(SU.u_mamt, down?0.55:0.0);
+    gl.uniform2f(SU.u_mouse, down?mpx:-1.0, down?mpy:-1.0);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+    [read,write]=[write,read]; [readF,writeF]=[writeF,readF];
+  }
+  function draw(){
+    gl.useProgram(dispProg); bindQuad(dispProg);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,canvas.width,canvas.height);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,read); gl.uniform1i(DU.u_tex,0);
+    gl.uniform2f(DU.u_texel,1/simW,1/simH); gl.uniform1f(DU.u_gain,state.gain); gl.uniform1f(DU.u_aspect,canvas.width/canvas.height);
+    const th=THEMES[state.theme]; gl.uniform3fv(DU.pa,th.a); gl.uniform3fv(DU.pb,th.b); gl.uniform3fv(DU.pc,th.c); gl.uniform3fv(DU.pd,th.d);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+  }
+  let paused=false, raf=0;
+  function frame(){ if(!paused) simStep(); draw(); raf=requestAnimationFrame(frame); }
+
+  // WebGL context-loss recovery: stop the loop on loss; rebuild cleanly on restore
+  canvas.addEventListener("webglcontextlost", (e)=>{ e.preventDefault(); if(raf) cancelAnimationFrame(raf); raf=0; });
+  canvas.addEventListener("webglcontextrestored", ()=>{ location.reload(); });
+
+  function resize(){ const d=Math.min(devicePixelRatio||1,2); canvas.width=Math.floor(innerWidth*d); canvas.height=Math.floor(innerHeight*d); canvas.style.width=innerWidth+"px"; canvas.style.height=innerHeight+"px"; }
+  let rt; addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{ resize(); alloc(); seed(); read=texA;readF=fboA;write=texB;writeF=fboB; },220); });
+
+  /* ---------- UI ---------- */
+  const presetsHost=document.getElementById("presets"),themesHost=document.getElementById("themes"),slidersHost=document.getElementById("sliders"),foot=document.getElementById("fpreset");
+  const sEls={};
+  function applyPreset(name){ Object.assign(state,PRESETS[name]); syncSliders(); [...presetsHost.children].forEach(c=>c.classList.toggle("on",c.textContent===name)); foot.textContent=name; seed(); }
+  PORDER.forEach(n=>{ const c=document.createElement("button"); c.className="chip"; c.textContent=n; c.onclick=()=>applyPreset(n); presetsHost.appendChild(c); });
+  THEMES.forEach((t,i)=>{ const c=document.createElement("button"); c.className="chip"+(i===state.theme?" on":""); c.textContent=t.name; c.onclick=()=>{ state.theme=i; [...themesHost.children].forEach((e,j)=>e.classList.toggle("on",j===i)); }; themesHost.appendChild(c); });
+  const sh2=document.createElement("div"); sh2.className="st"; sh2.textContent="Conditions"; slidersHost.appendChild(sh2);
+  SLIDERS.forEach(cfg=>{ const w=document.createElement("div"); w.className="ctrl";
+    w.innerHTML=`<div class="crow"><span class="cl">${cfg.label}</span><span class="cv" id="cv-${cfg.key}"></span></div>`;
+    const inp=document.createElement("input"); inp.type="range"; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=state[cfg.key];
+    inp.oninput=()=>{ state[cfg.key]=parseFloat(inp.value); upd(cfg,inp); if(cfg.key==="dt"||cfg.key==="ra"){ foot.textContent="CUSTOM"; [...presetsHost.children].forEach(c=>c.classList.remove("on")); } };
+    w.appendChild(inp); slidersHost.appendChild(w); sEls[cfg.key]=inp; });
+  function upd(cfg,inp){ inp.style.setProperty("--fill",((inp.value-cfg.min)/(cfg.max-cfg.min)*100)+"%"); document.getElementById("cv-"+cfg.key).textContent=cfg.fmt(parseFloat(inp.value)); }
+  function syncSliders(){ SLIDERS.forEach(cfg=>{ const i=sEls[cfg.key]; i.value=state[cfg.key]; upd(cfg,i); }); }
+
+  const panel=document.getElementById("panel"),reopen=document.getElementById("reopen");
+  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); }
+  function setPaused(p){ paused=p; document.querySelector("#pause span").textContent=paused?"Resume":"Pause"; }
+  function save(){ draw(); const a=document.createElement("a"); a.download=`animalcula-${Date.now()}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
+  document.getElementById("pause").onclick=()=>setPaused(!paused);
+  document.getElementById("seed").onclick=()=>seed();
+  document.getElementById("clear").onclick=()=>clearDish();
+  document.getElementById("save").onclick=save;
+  document.getElementById("hide").onclick=()=>togglePanel(true);
+  reopen.onclick=()=>togglePanel(false);
+  addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT")return; const k=e.key.toLowerCase();
+    if(k===" "){e.preventDefault();setPaused(!paused);} else if(k==="n")seed(); else if(k==="c")clearDish(); else if(k==="s")save(); else if(k==="h")togglePanel();
+    else if(k>="1"&&k<="4"){ const i=+k-1; if(i<PORDER.length)applyPreset(PORDER[i]); } });
+
+  /* ---------- boot ---------- */
+  resize(); alloc(); syncSliders(); read=texA;readF=fboA;write=texB;writeF=fboB;
+  applyPreset("GLIDERS");
+  raf=requestAnimationFrame(frame);
+
+  if(location.search.includes("debug")) window.__pump=(k=200)=>{ for(let i=0;i<k;i++) simStep(); draw(); return {sim:[simW,simH]}; };
+})();
+</script>
+<script src="../anima-nav.js" defer></script>
+</body>
+</html>

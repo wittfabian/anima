@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>MORPHOGENESIS — living patterns</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="Morphogenesis — living patterns" />
+<meta property="og:description" content="A Gray-Scott reaction-diffusion system on the GPU: Turing patterns that grow and crawl. Part of ANIMA." />
+<meta property="og:image" content="../og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Morphogenesis — living patterns" />
+<meta name="twitter:description" content="A Gray-Scott reaction-diffusion system on the GPU: Turing patterns that grow and crawl. Part of ANIMA." />
+<meta name="twitter:image" content="../og-image.png" />
+
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     MORPHOGENESIS — Gray-Scott reaction-diffusion on the GPU.
+     Aesthetic: biology lab / specimen, clinical mint accent.
+     ============================================================ */
+  :root{
+    --bg:#04080a; --ink:#e7f2ef; --muted:#6e8a84; --muted2:#46605b;
+    --line:rgba(180,255,235,0.08); --line2:rgba(180,255,235,0.18);
+    --accent:#5fe6c0; --accent2:#a6ffe6; --accentdim:rgba(95,230,192,0.13);
+    --disp:"Syne",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  canvas{position:fixed;inset:0;display:block;cursor:crosshair;}
+
+  .mast{position:fixed;top:28px;left:34px;z-index:5;pointer-events:none;animation:fade 1.4s ease both;}
+  .mast h1{font-family:var(--disp);font-weight:800;font-size:30px;letter-spacing:-0.02em;line-height:1;}
+  .mast h1 b{color:var(--accent);font-weight:800;}
+  .mast .sub{font-size:10px;letter-spacing:0.34em;text-transform:uppercase;color:var(--muted);margin-top:9px;}
+
+  .panel{position:fixed;top:16px;right:16px;bottom:16px;width:312px;z-index:6;display:flex;flex-direction:column;
+    background:rgba(7,14,15,0.74);border:1px solid var(--line);border-radius:15px;
+    backdrop-filter:blur(20px) saturate(120%);-webkit-backdrop-filter:blur(20px) saturate(120%);
+    box-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(180,255,235,0.05);
+    overflow:hidden;transition:transform .55s cubic-bezier(.16,1,.3,1),opacity .4s;animation:pin 1.2s .1s cubic-bezier(.16,1,.3,1) both;}
+  .panel.hidden{transform:translateX(calc(100% + 26px));opacity:0;pointer-events:none;}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:15px 17px 13px;border-bottom:1px solid var(--line);}
+  .head .t{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);}
+  .head .t span{color:var(--accent);}
+  .ib{width:25px;height:25px;display:grid;place-items:center;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;transition:all .18s;}
+  .ib:hover{color:var(--ink);border-color:var(--line2);}
+  .body{flex:1;overflow-y:auto;padding:4px 17px 16px;}
+  .body::-webkit-scrollbar{width:7px;}
+  .body::-webkit-scrollbar-thumb{background:rgba(180,255,235,0.1);border-radius:8px;}
+  .sec{padding:15px 0 3px;}
+  .sec+.sec{border-top:1px solid var(--line);}
+  .st{font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted2);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+  .st::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:9.5px;letter-spacing:0.07em;text-transform:uppercase;padding:7px 10px;border-radius:7px;border:1px solid var(--line);background:rgba(180,255,235,0.015);color:var(--muted);cursor:pointer;transition:all .16s;}
+  .chip:hover{color:var(--ink);border-color:var(--line2);}
+  .chip.on{color:#022;background:var(--accent);border-color:var(--accent);font-weight:600;box-shadow:0 0 16px rgba(95,230,192,0.3);}
+
+  .ctrl{margin-bottom:14px;}
+  .crow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .cl{font-size:11px;color:var(--muted);}
+  .cv{font-size:11px;color:var(--accent2);font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer;}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,var(--accent) var(--fill,0%),rgba(180,255,235,0.13) var(--fill,0%));}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-5px;border-radius:50%;background:#06141360;background:#081413;border:1.5px solid var(--accent);transition:box-shadow .18s;}
+  input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(95,230,192,0.12);}
+  input[type=range]::-moz-range-track{height:2px;background:rgba(180,255,235,0.13);border-radius:2px;}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#081413;border:1.5px solid var(--accent);}
+
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .btn{font-family:var(--mono);font-size:10px;letter-spacing:0.05em;padding:10px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(180,255,235,0.02);color:var(--ink);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn:hover{border-color:var(--line2);background:rgba(180,255,235,0.05);}
+  .btn:active{transform:translateY(1px);}
+  .btn.wide{grid-column:1/-1;}
+  .btn.pri{border-color:var(--accent);color:var(--accent2);background:var(--accentdim);}
+  .btn kbd{font-size:8px;color:var(--muted2);border:1px solid var(--line);border-radius:4px;padding:1px 4px;}
+
+  .foot{flex:0 0 auto;padding:11px 17px;border-top:1px solid var(--line);font-size:9px;letter-spacing:0.1em;color:var(--muted2);display:flex;justify-content:space-between;}
+  .foot a{color:var(--muted);text-decoration:none;cursor:pointer;}
+
+  .reopen{position:fixed;top:16px;right:16px;z-index:6;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(7,14,15,0.74);backdrop-filter:blur(16px);color:var(--accent);display:grid;place-items:center;cursor:pointer;font-size:16px;opacity:0;transform:scale(.85);pointer-events:none;transition:all .4s cubic-bezier(.16,1,.3,1);}
+  .reopen.show{opacity:1;transform:scale(1);pointer-events:auto;}
+
+  .hint{position:fixed;left:34px;bottom:26px;z-index:5;font-size:10px;letter-spacing:0.14em;line-height:1.9;color:var(--muted2);pointer-events:none;animation:fade 2s 0.8s ease both;}
+  .hint b{color:var(--muted);font-weight:400;}
+
+  .err{position:fixed;inset:0;display:none;place-items:center;z-index:30;background:rgba(4,8,10,0.92);padding:40px;text-align:center;}
+  .err.show{display:grid;}
+  .err div{max-width:440px;font-size:13px;line-height:1.7;color:var(--muted);}
+  .err b{color:var(--accent);font-family:var(--disp);font-size:20px;display:block;margin-bottom:14px;}
+
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pin{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+  @media (max-width:740px){.panel{width:auto;left:12px;right:12px;top:auto;bottom:12px;height:54vh;}.hint{display:none}}
+</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <style>
+    .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,0.42);text-decoration:none;padding:7px 15px;border:1px solid rgba(255,255,255,0.12);border-radius:100px;background:rgba(10,10,12,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:color .25s,border-color .25s,opacity .25s;opacity:0.62;}
+    .home-link:hover{color:#fff;border-color:rgba(255,255,255,0.32);opacity:1;}
+  </style>
+  <a class="home-link" href="../index.html" title="back to the gallery">✦&nbsp;anima</a>
+
+  <div class="mast">
+    <h1>MORPHO<b>GENESIS</b></h1>
+    <div class="sub">reaction · diffusion · living patterns</div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <div class="head"><div class="t">SPECIMEN <span>/ console</span></div><button class="ib" id="hide">›</button></div>
+    <div class="body">
+      <div class="sec"><div class="st">Cultures</div><div class="chips" id="presets"></div></div>
+      <div class="sec"><div class="st">Palette</div><div class="chips" id="themes"></div></div>
+      <div class="sec" id="sliders"></div>
+      <div class="sec"><div class="st">Actions</div>
+        <div class="acts">
+          <button class="btn pri" id="pause"><span>Pause</span><kbd>Space</kbd></button>
+          <button class="btn" id="seed">Re-seed <kbd>N</kbd></button>
+          <button class="btn" id="clear">Clear <kbd>C</kbd></button>
+          <button class="btn" id="save">Save <kbd>S</kbd></button>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span id="fpreset">CORAL</span><a id="help">drag to grow ·</a></div>
+  </aside>
+  <button class="reopen" id="reopen">⚙</button>
+
+  <div class="hint"><div><b>drag</b> on the dish to grow life</div><div><b>1–7</b> cultures &nbsp; <b>space</b> pause &nbsp; <b>N</b> re-seed</div></div>
+
+  <div class="err" id="err"><div><b>No WebGL2</b>This piece needs WebGL2 with float render targets. Try a recent Chrome, Firefox or Safari with hardware acceleration enabled.</div></div>
+
+<script>
+"use strict";
+(() => {
+  const canvas = document.getElementById("c");
+  const gl = canvas.getContext("webgl2", { antialias:false, preserveDrawingBuffer:true });
+  if(!gl || !gl.getExtension("EXT_color_buffer_float")){ document.getElementById("err").classList.add("show"); return; }
+  gl.getExtension("OES_texture_float_linear");
+
+  /* ---------- state ---------- */
+  const state = {
+    feed:0.0545, kill:0.0620, dA:1.0, dB:0.5, dt:1.0,
+    iters:14, brush:14, theme:0,
+  };
+  const PRESETS = {
+    CORAL:    {feed:0.0545, kill:0.0620},
+    MITOSIS:  {feed:0.0367, kill:0.0649},
+    MAZE:     {feed:0.0290, kill:0.0570},
+    WORMS:    {feed:0.0540, kill:0.0630},
+    HOLES:    {feed:0.0390, kill:0.0580},
+    WAVES:    {feed:0.0140, kill:0.0450},
+    SOLITONS: {feed:0.0620, kill:0.0610},
+  };
+  const PORDER = Object.keys(PRESETS);
+
+  // cosine palettes (IQ): color = a + b*cos(2pi*(c*t + d))
+  const THEMES = [
+    {name:"Abyss",  a:[0.10,0.18,0.22], b:[0.45,0.45,0.45], c:[1.0,1.0,1.0], d:[0.55,0.62,0.70]},
+    {name:"Magma",  a:[0.20,0.10,0.08], b:[0.55,0.40,0.35], c:[1.0,1.0,1.0], d:[0.00,0.12,0.22]},
+    {name:"Bio",    a:[0.08,0.20,0.16], b:[0.40,0.50,0.42], c:[1.0,1.0,1.0], d:[0.30,0.18,0.10]},
+    {name:"Gold",   a:[0.22,0.18,0.10], b:[0.50,0.45,0.30], c:[1.0,1.0,1.0], d:[0.10,0.20,0.35]},
+    {name:"Ice",    a:[0.16,0.20,0.26], b:[0.40,0.45,0.55], c:[1.0,1.0,1.0], d:[0.55,0.50,0.45]},
+    {name:"Mono",   a:[0.50,0.50,0.50], b:[0.50,0.50,0.50], c:[1.0,1.0,1.0], d:[0.00,0.00,0.00]},
+  ];
+
+  const SLIDERS = [
+    {key:"feed",  label:"Feed (f)",   min:0.005, max:0.10, step:0.0005, fmt:v=>v.toFixed(4)},
+    {key:"kill",  label:"Kill (k)",   min:0.030, max:0.075, step:0.0005, fmt:v=>v.toFixed(4)},
+    {key:"iters", label:"Sim speed",  min:1,     max:30,   step:1,      fmt:v=>v|0},
+    {key:"brush", label:"Brush size", min:4,     max:60,   step:1,      fmt:v=>v|0},
+  ];
+
+  /* ---------- gl helpers ---------- */
+  function sh(type, src){
+    const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) console.error("shader error:", gl.getShaderInfoLog(s), src);
+    return s;
+  }
+  function prog(vs,fs){
+    const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)) console.error("link error:", gl.getProgramInfoLog(p));
+    return p;
+  }
+  const VS = `#version 300 es
+  in vec2 p; out vec2 v_uv;
+  void main(){ v_uv = p*0.5+0.5; gl_Position = vec4(p,0.0,1.0); }`;
+
+  const SIM_FS = `#version 300 es
+  precision highp float;
+  uniform sampler2D u_tex; uniform vec2 u_texel; uniform vec2 u_res;
+  uniform float u_dA,u_dB,u_f,u_k,u_dt;
+  uniform vec2 u_mouse; uniform float u_brush; uniform float u_seed;
+  in vec2 v_uv; out vec4 o;
+  void main(){
+    vec2 t=u_texel; vec2 uv=v_uv;
+    vec2 c=texture(u_tex,uv).rg;
+    vec2 l = texture(u_tex,uv+vec2(-t.x,0.)).rg*0.2 + texture(u_tex,uv+vec2(t.x,0.)).rg*0.2
+           + texture(u_tex,uv+vec2(0.,-t.y)).rg*0.2 + texture(u_tex,uv+vec2(0.,t.y)).rg*0.2
+           + texture(u_tex,uv+vec2(-t.x,-t.y)).rg*0.05 + texture(u_tex,uv+vec2(t.x,-t.y)).rg*0.05
+           + texture(u_tex,uv+vec2(-t.x,t.y)).rg*0.05 + texture(u_tex,uv+vec2(t.x,t.y)).rg*0.05
+           - c;
+    float a=c.x,b=c.y, r=a*b*b;
+    float na=a+(u_dA*l.x - r + u_f*(1.0-a))*u_dt;
+    float nb=b+(u_dB*l.y + r - (u_k+u_f)*b)*u_dt;
+    if(u_mouse.x>=0.0){
+      float d=distance(gl_FragCoord.xy, u_mouse);
+      if(d<u_brush) nb += u_seed*smoothstep(u_brush,0.0,d);
+    }
+    o=vec4(clamp(na,0.,1.), clamp(nb,0.,1.), 0., 1.);
+  }`;
+
+  const DISP_FS = `#version 300 es
+  precision highp float;
+  uniform sampler2D u_tex; uniform vec2 u_texel;
+  uniform vec3 pa,pb,pc,pd;
+  in vec2 v_uv; out vec4 o;
+  vec3 pal(float t){ return pa + pb*cos(6.28318*(pc*t+pd)); }
+  void main(){
+    vec2 t=u_texel; float b=texture(u_tex,v_uv).g;
+    float bx=texture(u_tex,v_uv+vec2(t.x,0.)).g - texture(u_tex,v_uv-vec2(t.x,0.)).g;
+    float by=texture(u_tex,v_uv+vec2(0.,t.y)).g - texture(u_tex,v_uv-vec2(0.,t.y)).g;
+    vec3 nrm=normalize(vec3(-bx*5.0,-by*5.0,0.55));
+    float light=clamp(dot(nrm, normalize(vec3(0.4,0.55,0.75))),0.0,1.0);
+    float spec=pow(light,18.0);
+    float tt=clamp(b*3.0,0.0,1.0);
+    vec3 col=pal(tt);
+    col = col*(0.45+0.85*light) + spec*0.35;
+    // gentle vignette
+    vec2 q=v_uv-0.5; col *= 1.0 - dot(q,q)*0.5;
+    o=vec4(col,1.0);
+  }`;
+
+  const simProg = prog(VS, SIM_FS);
+  const dispProg = prog(VS, DISP_FS);
+
+  // fullscreen quad
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  function bindQuad(p){ const loc=gl.getAttribLocation(p,"p"); gl.enableVertexAttribArray(loc); gl.bindBuffer(gl.ARRAY_BUFFER,quad); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0); }
+
+  /* ---------- simulation textures (ping-pong) ---------- */
+  let simW, simH, texA, texB, fboA, fboB;
+  function makeTex(){
+    const t=gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D,t);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,simW,simH,0,gl.RGBA,gl.FLOAT,null);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
+    return t;
+  }
+  function makeFBO(t){ const f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0); return f; }
+
+  function allocSim(){
+    const LONG=1180, aspect=innerWidth/innerHeight;
+    if(aspect>=1){ simW=LONG; simH=Math.max(2,Math.round(LONG/aspect)); }
+    else { simH=LONG; simW=Math.max(2,Math.round(LONG*aspect)); }
+    texA=makeTex(); fboA=makeFBO(texA);
+    texB=makeTex(); fboB=makeFBO(texB);
+  }
+
+  function seed(){
+    const data=new Float32Array(simW*simH*4);
+    for(let i=0;i<simW*simH;i++){ data[i*4]=1.0; data[i*4+1]=0.0; data[i*4+3]=1.0; }
+    // scatter random blobs of B to kick off morphogenesis
+    const blobs=18;
+    for(let n=0;n<blobs;n++){
+      const cx=(0.2+Math.random()*0.6)*simW|0, cy=(0.2+Math.random()*0.6)*simH|0, rr=(6+Math.random()*12)|0;
+      for(let y=-rr;y<=rr;y++)for(let x=-rr;x<=rr;x++){
+        if(x*x+y*y>rr*rr) continue;
+        const px=cx+x, py=cy+y; if(px<0||py<0||px>=simW||py>=simH) continue;
+        data[(py*simW+px)*4+1]=1.0;
+      }
+    }
+    gl.bindTexture(gl.TEXTURE_2D,texA); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,simW,simH,0,gl.RGBA,gl.FLOAT,data);
+    gl.bindTexture(gl.TEXTURE_2D,texB); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,simW,simH,0,gl.RGBA,gl.FLOAT,data);
+  }
+  function clearDish(){
+    const data=new Float32Array(simW*simH*4);
+    for(let i=0;i<simW*simH;i++){ data[i*4]=1.0; data[i*4+3]=1.0; }
+    gl.bindTexture(gl.TEXTURE_2D,texA); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,simW,simH,0,gl.RGBA,gl.FLOAT,data);
+    gl.bindTexture(gl.TEXTURE_2D,texB); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,simW,simH,0,gl.RGBA,gl.FLOAT,data);
+  }
+
+  /* ---------- uniforms ---------- */
+  const SU = {}; ["u_tex","u_texel","u_res","u_dA","u_dB","u_f","u_k","u_dt","u_mouse","u_brush","u_seed"].forEach(k=>SU[k]=gl.getUniformLocation(simProg,k));
+  const DU = {}; ["u_tex","u_texel","pa","pb","pc","pd"].forEach(k=>DU[k]=gl.getUniformLocation(dispProg,k));
+
+  /* ---------- pointer ---------- */
+  let down=false, mpx=-1, mpy=-1;
+  function setMouse(e){ mpx = e.clientX/innerWidth*simW; mpy = (1 - e.clientY/innerHeight)*simH; }
+  canvas.addEventListener("pointerdown",e=>{ down=true; setMouse(e); canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove",e=>{ if(down) setMouse(e); });
+  canvas.addEventListener("pointerup",()=>{ down=false; });
+  canvas.addEventListener("pointercancel",()=>{ down=false; });
+  canvas.addEventListener("contextmenu",e=>e.preventDefault());
+
+  /* ---------- step + render ---------- */
+  let read=texA, readF=fboA, write=texB, writeF=fboB;
+  function swap(){ [read,write]=[write,read]; [readF,writeF]=[writeF,readF]; }
+
+  function simStep(){
+    gl.useProgram(simProg); bindQuad(simProg);
+    gl.viewport(0,0,simW,simH);
+    gl.uniform2f(SU.u_texel,1/simW,1/simH);
+    gl.uniform2f(SU.u_res,simW,simH);
+    gl.uniform1f(SU.u_dA,state.dA); gl.uniform1f(SU.u_dB,state.dB);
+    gl.uniform1f(SU.u_f,state.feed); gl.uniform1f(SU.u_k,state.kill); gl.uniform1f(SU.u_dt,state.dt);
+    gl.uniform1f(SU.u_brush,state.brush); gl.uniform1f(SU.u_seed, down?0.9:0.0);
+    gl.uniform2f(SU.u_mouse, down?mpx:-1.0, down?mpy:-1.0);
+    const iters=state.iters;
+    for(let i=0;i<iters;i++){
+      gl.bindFramebuffer(gl.FRAMEBUFFER,writeF);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,read);
+      gl.uniform1i(SU.u_tex,0);
+      gl.drawArrays(gl.TRIANGLES,0,3);
+      swap();
+      // mouse seed only on first iter to avoid over-seeding
+      if(i===0){ gl.uniform1f(SU.u_seed,0.0); gl.uniform2f(SU.u_mouse,-1.0,-1.0); }
+    }
+  }
+  function draw(){
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    gl.viewport(0,0,canvas.width,canvas.height);
+    gl.useProgram(dispProg); bindQuad(dispProg);
+    gl.uniform2f(DU.u_texel,1/simW,1/simH);
+    const th=THEMES[state.theme];
+    gl.uniform3fv(DU.pa,th.a); gl.uniform3fv(DU.pb,th.b); gl.uniform3fv(DU.pc,th.c); gl.uniform3fv(DU.pd,th.d);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,read); gl.uniform1i(DU.u_tex,0);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+  }
+
+  let paused=false;
+  function frame(){ if(!paused) simStep(); draw(); requestAnimationFrame(frame); }
+
+  /* ---------- canvas sizing ---------- */
+  function resize(){
+    const dprc=Math.min(devicePixelRatio||1,2);
+    canvas.width=Math.floor(innerWidth*dprc); canvas.height=Math.floor(innerHeight*dprc);
+    canvas.style.width=innerWidth+"px"; canvas.style.height=innerHeight+"px";
+  }
+  let rt;
+  addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{ resize(); allocSim(); seed(); read=texA;readF=fboA;write=texB;writeF=fboB; },200); });
+
+  /* ---------- UI ---------- */
+  const presetsHost=document.getElementById("presets"), themesHost=document.getElementById("themes"),
+        slidersHost=document.getElementById("sliders"), foot=document.getElementById("fpreset");
+  const sEls={};
+  function applyPreset(name,doSeed=true){
+    Object.assign(state,PRESETS[name]); syncSliders();
+    [...presetsHost.children].forEach(c=>c.classList.toggle("on",c.textContent===name));
+    foot.textContent=name; if(doSeed) seed();
+  }
+  PORDER.forEach(name=>{ const c=document.createElement("button"); c.className="chip"; c.textContent=name; c.onclick=()=>applyPreset(name); presetsHost.appendChild(c); });
+  THEMES.forEach((t,i)=>{ const c=document.createElement("button"); c.className="chip"+(i===state.theme?" on":""); c.textContent=t.name; c.onclick=()=>{ state.theme=i; [...themesHost.children].forEach((e,j)=>e.classList.toggle("on",j===i)); }; themesHost.appendChild(c); });
+
+  const sh2=document.createElement("div"); sh2.className="st"; sh2.textContent="Chemistry"; slidersHost.appendChild(sh2);
+  SLIDERS.forEach(cfg=>{
+    const w=document.createElement("div"); w.className="ctrl";
+    w.innerHTML=`<div class="crow"><span class="cl">${cfg.label}</span><span class="cv" id="cv-${cfg.key}"></span></div>`;
+    const inp=document.createElement("input"); inp.type="range"; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=state[cfg.key];
+    inp.oninput=()=>{ state[cfg.key]=parseFloat(inp.value); upd(cfg,inp); foot.textContent="CUSTOM"; [...presetsHost.children].forEach(c=>c.classList.remove("on")); };
+    w.appendChild(inp); slidersHost.appendChild(w); sEls[cfg.key]=inp;
+  });
+  function upd(cfg,inp){ inp.style.setProperty("--fill",((inp.value-cfg.min)/(cfg.max-cfg.min)*100)+"%"); document.getElementById("cv-"+cfg.key).textContent=cfg.fmt(state[cfg.key]); }
+  function syncSliders(){ SLIDERS.forEach(cfg=>{ const i=sEls[cfg.key]; i.value=state[cfg.key]; upd(cfg,i); }); }
+
+  const panel=document.getElementById("panel"), reopen=document.getElementById("reopen");
+  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); }
+  function setPaused(p){ paused=p; document.querySelector("#pause span").textContent=paused?"Resume":"Pause"; }
+  function save(){ draw(); const a=document.createElement("a"); a.download=`morphogenesis-${Date.now()}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
+
+  document.getElementById("pause").onclick=()=>setPaused(!paused);
+  document.getElementById("seed").onclick=()=>seed();
+  document.getElementById("clear").onclick=()=>clearDish();
+  document.getElementById("save").onclick=save;
+  document.getElementById("hide").onclick=()=>togglePanel(true);
+  reopen.onclick=()=>togglePanel(false);
+
+  addEventListener("keydown",e=>{
+    if(e.target.tagName==="INPUT")return; const k=e.key.toLowerCase();
+    if(k===" "){e.preventDefault();setPaused(!paused);}
+    else if(k==="n")seed(); else if(k==="c")clearDish(); else if(k==="s")save(); else if(k==="h")togglePanel();
+    else if(k>="1"&&k<="7"){ const i=+k-1; if(i<PORDER.length)applyPreset(PORDER[i]); }
+  });
+
+  /* ---------- boot ---------- */
+  resize(); allocSim();
+  syncSliders();
+  applyPreset("CORAL", false);
+  seed();
+  read=texA;readF=fboA;write=texB;writeF=fboB;
+  requestAnimationFrame(frame);
+
+  // headless verification hook (inert unless ?debug)
+  if(location.search.includes("debug")) window.__pump=(k=120)=>{ for(let i=0;i<k;i++) simStep(); draw(); };
+})();
+</script>
+<script src="../anima-nav.js" defer></script>
+</body>
+</html>

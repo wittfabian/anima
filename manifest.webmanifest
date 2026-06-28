@@ -1,0 +1,15 @@
+{
+  "name": "ANIMA — a cabinet of living things",
+  "short_name": "ANIMA",
+  "description": "Seven generative worlds, each grown from a few simple rules. Particle life, flow fields, reaction-diffusion, a sound garden, slime mould, differential growth, and continuous cellular automata.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#07070b",
+  "theme_color": "#07070b",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

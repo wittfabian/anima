@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ANIMA — a cabinet of living things</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="ANIMA — a cabinet of living things" />
+<meta property="og:description" content="Seven generative worlds, each grown from a few simple rules. Particle life, flow fields, reaction-diffusion, a sound garden, slime mould, differential growth and cellular automata." />
+<meta property="og:image" content="og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="ANIMA — a cabinet of living things" />
+<meta name="twitter:description" content="Seven generative worlds, each grown from a few simple rules. Particle life, flow fields, reaction-diffusion, a sound garden, slime mould, differential growth and cellular automata." />
+<meta name="twitter:image" content="og-image.png" />
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#07070b" />
+<meta name="description" content="A cabinet of living things — seven generative worlds, each grown from a few simple rules. Particle life, flow fields, reaction-diffusion, a sound garden, slime mould, differential growth, and cellular automata." />
+<link rel="stylesheet" href="fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     ANIMA — gallery hub for the Weekly-Fun cabinet.
+     Aesthetic: editorial / observatory index, high-contrast didone.
+     ============================================================ */
+  :root{
+    --bg:#070708; --ink:#ece9e3; --muted:#8a877f; --muted2:#54524c;
+    --line:rgba(236,233,227,0.10); --line2:rgba(236,233,227,0.22);
+    --didone:"Bodoni Moda",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  body{
+    background:
+      radial-gradient(140% 120% at 50% -10%, #101013 0%, #070708 55%, #040405 100%);
+    overflow-x:hidden;
+  }
+  .grain{position:fixed;inset:-50%;pointer-events:none;z-index:50;opacity:0.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .vig{position:fixed;inset:0;pointer-events:none;z-index:49;background:radial-gradient(130% 110% at 50% 40%,transparent 58%,rgba(0,0,0,0.6) 100%);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(40px,7vh,90px) clamp(22px,5vw,60px) 70px;position:relative;z-index:2;}
+
+  header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;
+    padding-bottom:34px;margin-bottom:48px;border-bottom:1px solid var(--line);
+    animation:rise 1s cubic-bezier(.16,1,.3,1) both;}
+  .brand h1{font-family:var(--didone);font-weight:400;font-size:clamp(54px,10vw,118px);line-height:0.88;letter-spacing:0.01em;}
+  .brand h1 i{font-style:italic;}
+  .brand .kick{font-family:var(--mono);font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;margin-left:4px;}
+  .meta{font-family:var(--mono);font-size:11px;line-height:1.9;letter-spacing:0.08em;color:var(--muted);text-align:right;max-width:300px;}
+  .meta b{color:var(--ink);font-weight:400;}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(16px,2.4vw,30px);}
+  @media (max-width:720px){.grid{grid-template-columns:1fr;} .meta{text-align:left;}}
+
+  .card{position:relative;display:block;border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;
+    background:#0a0a0c;text-decoration:none;color:inherit;isolation:isolate;
+    transition:transform .5s cubic-bezier(.16,1,.3,1), border-color .4s, box-shadow .5s;
+    animation:rise .9s cubic-bezier(.16,1,.3,1) both;}
+  .card:hover{transform:translateY(-6px);border-color:var(--line2);box-shadow:0 30px 70px rgba(0,0,0,0.6);}
+  .card canvas{display:block;width:100%;height:230px;background:#060607;}
+  @media (max-width:480px){.card canvas{height:180px;}}
+  .card.wide{grid-column:1 / -1;}
+  .card.wide canvas{height:300px;}
+  .card.wide h2{font-size:36px;}
+  @media (max-width:480px){.card.wide canvas{height:200px;}}
+  .card .grad{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(to top, #0a0a0c 4%, rgba(10,10,12,0.2) 40%, transparent 70%);}
+  .card .body{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:22px 24px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;}
+  .card .num{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;color:var(--muted);}
+  .card h2{font-family:var(--didone);font-weight:500;font-size:30px;line-height:1;letter-spacing:0.01em;margin:7px 0 8px;}
+  .card .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:0.03em;color:var(--muted);font-style:normal;}
+  .card .tech{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted2);
+    border:1px solid var(--line);border-radius:100px;padding:6px 11px;white-space:nowrap;transition:all .3s;}
+  .card:hover .tech{color:var(--ink);border-color:var(--line2);}
+  .card .enter{position:absolute;top:18px;right:20px;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:0.12em;
+    color:var(--muted);opacity:0;transform:translateX(-6px);transition:all .4s;}
+  .card:hover .enter{opacity:1;transform:translateX(0);}
+  .accentbar{position:absolute;top:0;left:0;right:0;height:2px;z-index:2;transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.16,1,.3,1);}
+  .card:hover .accentbar{transform:scaleX(1);}
+
+  footer{margin-top:54px;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted2);
+    animation:rise 1s .3s cubic-bezier(.16,1,.3,1) both;}
+  footer span b{color:var(--muted);font-weight:400;}
+  .shuffle{cursor:pointer;transition:color .25s;}
+  .shuffle:hover{color:var(--ink);}
+  .codex-link{display:inline-block;margin-top:15px;font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line2);padding-bottom:3px;transition:color .25s,border-color .25s;}
+  .codex-link:hover{color:var(--ink);border-color:var(--ink);}
+
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  .card:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
+  .card:focus-visible .enter{opacity:1;transform:translateX(0)}
+  .card:focus-visible .accentbar{transform:scaleX(1)}
+  .shuffle:focus-visible{outline:2px solid var(--ink);outline-offset:3px;color:var(--ink);}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}}
+  .card.ancestor{border-color:rgba(93,255,155,0.38);box-shadow:0 0 0 1px rgba(93,255,155,0.14), 0 26px 64px rgba(0,0,0,0.6);}
+  .card.ancestor .num{color:#5dff9b;letter-spacing:0.2em;}
+  .eggtoast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);z-index:60;padding:10px 20px;border-radius:100px;background:rgba(5,12,10,0.86);border:1px solid rgba(93,255,155,0.32);backdrop-filter:blur(14px);font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#5dff9b;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;}
+  .eggtoast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+  <div class="vig"></div>
+  <div class="grain"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="kick">weekly · fun · mmxxvi</div>
+        <h1>An<i>i</i>ma</h1>
+      </div>
+      <div class="meta">
+        <b>a cabinet of living things</b><br>
+        seven generative worlds — each grown from a few<br>
+        simple rules. nothing here repeats. pick one,<br>
+        leave it running, and watch it become.
+        <br><a class="codex-link" href="codex/index.html">→ read the codex</a>
+      </div>
+    </header>
+
+    <div class="grid" id="grid"></div>
+
+    <footer>
+      <span><b>07</b> worlds · canvas · webgl · web&nbsp;audio</span>
+      <span class="shuffle" id="shuffle" role="button" tabindex="0" aria-label="Open a random world">⟳ surprise me</span>
+    </footer>
+  </div>
+
+<script>
+"use strict";
+(() => {
+  const CARDS = [
+    { n:"01", name:"Primordia",    tag:"emergent particle life",        tech:"canvas · physics",            href:"primordia/index.html",     accent:"#f4a428", motif:"particles" },
+    { n:"02", name:"Flux",         tag:"silk woven from a flow field",  tech:"canvas · perlin noise",       href:"flux/index.html",          accent:"#62c7e0", motif:"flow" },
+    { n:"03", name:"Morphogenesis",tag:"patterns that grow themselves", tech:"webgl · reaction-diffusion",  href:"morphogenesis/index.html", accent:"#5fe6c0", motif:"organic" },
+    { n:"04", name:"Resonance",    tag:"a garden that sings in ripples",tech:"web audio · canvas",          href:"resonance/index.html",     accent:"#f0c27b", motif:"ripples" },
+    { n:"05", name:"Mycelia",      tag:"a mind without a brain",        tech:"webgl · physarum · 1M agents",href:"mycelia/index.html",       accent:"#aef24a", motif:"mycelia" },
+    { n:"06", name:"Folia",        tag:"growth that folds in on itself",tech:"canvas · differential growth",href:"folia/index.html",         accent:"#6f9e6a", motif:"fold" },
+    { n:"07", name:"Animalcula",   tag:"small living things that emerge from noise", tech:"webgl · smoothlife · cellular automata", href:"animalcula/index.html", accent:"#b98cff", motif:"cells", wide:true },
+  ];
+
+  const grid = document.getElementById("grid");
+  const motifs = [];
+  const isTouch = matchMedia("(hover: none)").matches;   // on touch, energy is driven by visibility (IO), not hover
+
+  CARDS.forEach((c, idx) => {
+    const a = document.createElement("a");
+    a.className = "card" + (c.wide ? " wide" : ""); a.href = c.href; a.style.animationDelay = (0.08*idx + 0.15) + "s";
+    a.setAttribute("aria-label", `${c.name} — ${c.tag} (${c.tech})`);
+    a.innerHTML = `
+      <div class="accentbar" style="background:${c.accent}" aria-hidden="true"></div>
+      <canvas aria-hidden="true"></canvas>
+      <div class="grad" aria-hidden="true"></div>
+      <div class="enter" style="color:${c.accent}" aria-hidden="true">enter →</div>
+      <div class="body">
+        <div>
+          <div class="num">${c.n} / ${String(CARDS.length).padStart(2,"0")}</div>
+          <h2>${c.name}</h2>
+          <div class="tag">${c.tag}</div>
+        </div>
+        <div class="tech">${c.tech}</div>
+      </div>`;
+    grid.appendChild(a);
+
+    const cv = a.querySelector("canvas");
+    const m = { cv, ctx: cv.getContext("2d"), card: c, el: a, visible: true, energy: 0.46, target: 0.46, state: null, w:0, h:0 };
+    if (!isTouch) {
+      a.addEventListener("pointerenter", () => m.target = 1);
+      a.addEventListener("pointerleave", () => m.target = 0.46);
+    }
+    motifs.push(m);
+  });
+
+  /* ---------- sizing ---------- */
+  function sizeAll(){
+    const dpr = Math.min(devicePixelRatio||1, 2);
+    motifs.forEach(m=>{
+      const r = m.cv.getBoundingClientRect();
+      m.w = Math.max(2, Math.floor(r.width*dpr)); m.h = Math.max(2, Math.floor(r.height*dpr));
+      m.cv.width = m.w; m.cv.height = m.h; m.dpr = dpr;
+      m.ctx.fillStyle = "#060607"; m.ctx.fillRect(0,0,m.w,m.h);
+      initState(m);
+    });
+  }
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function composeStatic(){ for(let i=0;i<140;i++) for(const m of motifs){ m.energy=0.7; drawMotif(m,0.03); } }
+  addEventListener("resize", ()=>{ clearTimeout(window.__rt); window.__rt=setTimeout(()=>{ sizeAll(); if(reduceMotion) composeStatic(); }, 200); });
+
+  /* ---------- per-motif state + draw ---------- */
+  const rgb = hex => { const n=parseInt(hex.slice(1),16); return [n>>16&255,n>>8&255,n&255]; };
+
+  function initState(m){
+    const {w,h}=m, type=m.card.motif;
+    if(type==="particles"){
+      const pal=[[255,93,115],[255,209,102],[60,222,160],[76,201,240],[183,148,246]];
+      m.state={ p:Array.from({length:46},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5),vy:(Math.random()-.5),c:pal[(Math.random()*pal.length)|0]})) };
+    } else if(type==="flow"){
+      m.state={ p:Array.from({length:38},()=>({x:Math.random()*w,y:Math.random()*h})), t:0, base:rgb(m.card.accent) };
+    } else if(type==="organic"){
+      m.state={ blobs:Array.from({length:5},(_,i)=>({a:Math.random()*6.28,sp:0.2+Math.random()*0.5,rad:0.18+Math.random()*0.16,ph:Math.random()*6.28})), base:rgb(m.card.accent) };
+    } else if(type==="ripples"){
+      m.state={ em:[{x:w*0.34,y:h*0.55},{x:w*0.7,y:h*0.4}], rings:[], t:0, acc:0, base:rgb(m.card.accent) };
+    } else if(type==="mycelia"){
+      m.state={ p:Array.from({length:72},()=>({x:Math.random()*w,y:Math.random()*h})), t:0, base:rgb(m.card.accent) };
+    } else if(type==="fold"){
+      const cx=w/2, cy=h/2, r=Math.min(w,h)*0.11, cnt=26, nodes=[];
+      for(let i=0;i<cnt;i++){ const t=i/cnt*6.2831; nodes.push({x:cx+Math.cos(t)*r,y:cy+Math.sin(t)*r}); }
+      m.state={ nodes, base:rgb(m.card.accent), restLen:5*m.dpr, cap:700 };
+    } else if(type==="cells"){
+      m.state={ blobs:Array.from({length:36},()=>({x:Math.random()*w,y:Math.random()*h,r:(0.035+Math.random()*0.06)*Math.min(w,h),sp:0.2+Math.random()*0.6,ph:Math.random()*6.28,vx:(Math.random()-0.5)*0.35,vy:(Math.random()-0.5)*0.35})), base:rgb(m.card.accent) };
+    } else if(type==="conway"){
+      const cs=Math.max(3,Math.round(5*m.dpr)), cc=Math.max(2,Math.floor(w/cs)), rr=Math.max(2,Math.floor(h/cs));
+      const g=new Uint8Array(cc*rr); for(let i=0;i<g.length;i++) g[i]=Math.random()<0.28?1:0;
+      m.state={ cs, cc, rr, g, b:new Uint8Array(cc*rr), acc:0, base:rgb(m.card.accent) };
+    }
+  }
+
+  function drawMotif(m, dt){
+    const {ctx,w,h}=m, e=m.energy, type=m.card.motif, s=m.state; if(!s) return;
+    if(type==="particles"){
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="rgba(6,6,7,0.16)"; ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation="lighter";
+      const sp=(0.4+e*1.6)*m.dpr;
+      for(const q of s.p){
+        q.vx+=(Math.random()-.5)*0.15; q.vy+=(Math.random()-.5)*0.15; q.vx*=0.95; q.vy*=0.95;
+        q.x+=q.vx*sp; q.y+=q.vy*sp;
+        if(q.x<0)q.x+=w; if(q.x>w)q.x-=w; if(q.y<0)q.y+=h; if(q.y>h)q.y-=h;
+        ctx.fillStyle=`rgba(${q.c[0]},${q.c[1]},${q.c[2]},${0.5+e*0.4})`;
+        ctx.beginPath(); ctx.arc(q.x,q.y,1.7*m.dpr,0,6.2832); ctx.fill();
+      }
+    } else if(type==="flow"){
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="rgba(6,6,7,0.05)"; ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation="lighter";
+      s.t+=dt*(0.2+e*0.8); const c=s.base; ctx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${0.10+e*0.16})`; ctx.lineWidth=1.1*m.dpr;
+      const sp=(0.6+e*2.2)*m.dpr;
+      for(const q of s.p){
+        const ang=(Math.sin(q.x*0.012+s.t)+Math.cos(q.y*0.015-s.t*0.7)+Math.sin((q.x+q.y)*0.008+s.t*0.5))*1.4;
+        const nx=q.x+Math.cos(ang)*sp, ny=q.y+Math.sin(ang)*sp;
+        ctx.beginPath(); ctx.moveTo(q.x,q.y); ctx.lineTo(nx,ny); ctx.stroke();
+        q.x=nx;q.y=ny;
+        if(q.x<-3||q.x>w+3||q.y<-3||q.y>h+3){ q.x=Math.random()*w; q.y=Math.random()*h; }
+      }
+    } else if(type==="organic"){
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="#060607"; ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation="lighter";
+      const c=s.base;
+      for(const b of s.blobs){
+        b.ph+=dt*b.sp*(0.4+e*1.4);
+        const cx=w*0.5+Math.cos(b.a+b.ph)*w*0.26, cy=h*0.5+Math.sin(b.a*1.3+b.ph*0.8)*h*0.26;
+        const R=(b.rad+0.05*Math.sin(b.ph*1.7))*Math.min(w,h);
+        const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+        g.addColorStop(0,`rgba(${c[0]},${c[1]},${c[2]},${0.16+e*0.22})`);
+        g.addColorStop(0.6,`rgba(${c[0]},${c[1]},${c[2]},${0.05+e*0.08})`);
+        g.addColorStop(1,"rgba(0,0,0,0)");
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.fill();
+      }
+    } else if(type==="ripples"){
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="rgba(6,6,7,0.14)"; ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation="lighter";
+      const c=s.base; s.acc+=dt*(0.5+e*1.6);
+      if(s.acc>0.9){ s.acc=0; const em=s.em[(Math.random()*s.em.length)|0]; s.rings.push({x:em.x,y:em.y,r:2}); }
+      const maxR=Math.hypot(w,h)*0.6, sp=(40+e*120)*m.dpr;
+      for(let i=s.rings.length-1;i>=0;i--){ const r=s.rings[i]; r.r+=sp*dt; const a=Math.max(0,(1-r.r/maxR))*(0.5+e*0.4);
+        ctx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${a})`; ctx.lineWidth=1.3*m.dpr; ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,6.2832); ctx.stroke();
+        if(r.r>maxR) s.rings.splice(i,1);
+      }
+      for(const em of s.em){ ctx.fillStyle=`rgba(255,255,255,${0.5+e*0.4})`; ctx.beginPath(); ctx.arc(em.x,em.y,2.4*m.dpr,0,6.2832); ctx.fill(); }
+    } else if(type==="fold"){
+      const dpr=m.dpr, restLen=s.restLen, repR=restLen*1.7, repR2=repR*repR, repF=0.6*dpr, springK=0.42, maxStep=repR*0.5;
+      const sub=e>0.6?2:1;
+      for(let it=0;it<sub;it++){
+        const nodes=s.nodes, n=nodes.length;
+        for(let i=0;i<n;i++){
+          const nd=nodes[i], pr=nodes[(i-1+n)%n], nx=nodes[(i+1)%n]; let fx=0,fy=0;
+          let dx=pr.x-nd.x,dy=pr.y-nd.y,d=Math.hypot(dx,dy); if(d>0.001){const f=(d-restLen)*springK;fx+=dx/d*f;fy+=dy/d*f;}
+          dx=nx.x-nd.x;dy=nx.y-nd.y;d=Math.hypot(dx,dy); if(d>0.001){const f=(d-restLen)*springK;fx+=dx/d*f;fy+=dy/d*f;}
+          for(let j=0;j<n;j++){ if(j===i||j===(i-1+n)%n||j===(i+1)%n) continue; const ox=nd.x-nodes[j].x,oy=nd.y-nodes[j].y,o2=ox*ox+oy*oy; if(o2>0&&o2<repR2){const od=Math.sqrt(o2),pu=(1-od/repR)*repF;fx+=ox/od*pu;fy+=oy/od*pu;} }
+          if(fx>maxStep)fx=maxStep;else if(fx<-maxStep)fx=-maxStep; if(fy>maxStep)fy=maxStep;else if(fy<-maxStep)fy=-maxStep;
+          nd.fx=fx; nd.fy=fy;
+        }
+        for(let i=0;i<n;i++){ nodes[i].x+=nodes[i].fx; nodes[i].y+=nodes[i].fy; }
+        if(nodes.length<s.cap){ const thr=restLen*0.9,thr2=thr*thr,out=[]; for(let i=0;i<nodes.length;i++){ const a=nodes[i],b=nodes[(i+1)%nodes.length]; out.push(a); const ddx=b.x-a.x,ddy=b.y-a.y; if(ddx*ddx+ddy*ddy>thr2&&Math.random()<0.08&&out.length<s.cap) out.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2}); } s.nodes=out; }
+        else if(Math.random()<0.0012){ const cx=w/2,cy=h/2,r=Math.min(w,h)*0.11,cnt=26,nn=[]; for(let q=0;q<cnt;q++){const t=q/cnt*6.2831;nn.push({x:cx+Math.cos(t)*r,y:cy+Math.sin(t)*r});} s.nodes=nn; }
+      }
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="#060607"; ctx.fillRect(0,0,w,h);
+      const nodes=s.nodes, c=s.base; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.lineWidth=1.0*m.dpr;
+      ctx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${0.5+e*0.45})`;
+      ctx.beginPath(); ctx.moveTo(nodes[0].x,nodes[0].y); for(let i=1;i<nodes.length;i++) ctx.lineTo(nodes[i].x,nodes[i].y); ctx.closePath(); ctx.stroke();
+    } else if(type==="cells"){
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="rgba(6,6,7,0.22)"; ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation="lighter"; const c=s.base;
+      for(const b of s.blobs){
+        b.ph+=dt*b.sp*(0.5+e); b.x+=b.vx*(0.4+e)*m.dpr; b.y+=b.vy*(0.4+e)*m.dpr;
+        if(b.x<0)b.x+=w; else if(b.x>w)b.x-=w; if(b.y<0)b.y+=h; else if(b.y>h)b.y-=h;
+        const rr=b.r*(0.85+0.2*Math.sin(b.ph));
+        const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,rr);
+        g.addColorStop(0,`rgba(${c[0]},${c[1]},${c[2]},${0.05+e*0.10})`);
+        g.addColorStop(0.7,`rgba(${c[0]},${c[1]},${c[2]},${0.025+e*0.05})`);
+        g.addColorStop(1,"rgba(0,0,0,0)");
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,rr,0,6.2832); ctx.fill();
+        ctx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${0.09+e*0.16})`; ctx.lineWidth=1.0*m.dpr; ctx.beginPath(); ctx.arc(b.x,b.y,rr*0.95,0,6.2832); ctx.stroke();
+      }
+    } else if(type==="mycelia"){
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="rgba(6,6,7,0.022)"; ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation="lighter";
+      s.t+=dt*(0.15+e*0.6); const c=s.base; ctx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${0.055+e*0.10})`; ctx.lineWidth=2.0*m.dpr;
+      const sp=(0.5+e*1.8)*m.dpr;
+      for(const q of s.p){
+        const ang=(Math.sin(q.x*0.010+s.t)+Math.cos(q.y*0.012-s.t*0.6)+Math.sin((q.x-q.y)*0.006+s.t*0.4))*1.7;
+        const nx=q.x+Math.cos(ang)*sp, ny=q.y+Math.sin(ang)*sp;
+        ctx.beginPath(); ctx.moveTo(q.x,q.y); ctx.lineTo(nx,ny); ctx.stroke();
+        q.x=nx; q.y=ny;
+        if(q.x<-3||q.x>w+3||q.y<-3||q.y>h+3||Math.random()<0.004){ q.x=Math.random()*w; q.y=Math.random()*h; }
+      }
+    } else if(type==="conway"){
+      s.acc += dt*(2+e*9);
+      if(s.acc>=1){ s.acc=0;
+        const cc=s.cc, rr=s.rr, g=s.g, b=s.b;
+        for(let y=0;y<rr;y++){ const ym=(y-1+rr)%rr, yp=(y+1)%rr;
+          for(let x=0;x<cc;x++){ const xm=(x-1+cc)%cc, xp=(x+1)%cc;
+            const n=g[ym*cc+xm]+g[ym*cc+x]+g[ym*cc+xp]+g[y*cc+xm]+g[y*cc+xp]+g[yp*cc+xm]+g[yp*cc+x]+g[yp*cc+xp];
+            const a=g[y*cc+x]; b[y*cc+x]=(a&&(n===2||n===3))||(!a&&n===3)?1:0; } }
+        g.set(b);
+        let alive=0; for(let i=0;i<g.length;i++) alive+=g[i];
+        if(alive < cc*rr*0.05){ for(let i=0;i<g.length;i++) g[i]=Math.random()<0.28?1:0; }
+      }
+      ctx.globalCompositeOperation="source-over"; ctx.fillStyle="rgba(6,6,7,0.34)"; ctx.fillRect(0,0,w,h);
+      const c=s.base, cs=s.cs, rsz=Math.max(1,cs-1); ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${0.45+e*0.5})`;
+      for(let y=0;y<s.rr;y++){ const row=y*s.cc, py=y*cs; for(let x=0;x<s.cc;x++){ if(s.g[row+x]) ctx.fillRect(x*cs,py,rsz,rsz); } }
+    }
+  }
+
+  /* ---------- shared loop ---------- */
+  let last=performance.now();
+  function loop(now){
+    let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05;
+    for(const m of motifs){ if(!m.visible) continue; m.energy += (m.target-m.energy)*Math.min(1,dt*5); drawMotif(m,dt); }
+    requestAnimationFrame(loop);
+  }
+
+  // shuffle (keyboard-operable)
+  const shuffleEl = document.getElementById("shuffle");
+  const shuffleGo = () => { location.href = CARDS[(Math.random()*CARDS.length)|0].href; };
+  if (shuffleEl) {
+    shuffleEl.addEventListener("click", shuffleGo);
+    shuffleEl.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); shuffleGo(); } });
+  }
+  // keep footer world-count in sync with CARDS
+  const wcountEl = document.querySelector("footer b");
+  if (wcountEl) wcountEl.textContent = String(CARDS.length).padStart(2, "0");
+
+  // pause offscreen previews; on touch (no hover) drive energy by visibility
+  const byEl = new Map(motifs.map(m => [m.el, m]));
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) { const m = byEl.get(en.target); if (!m) continue; m.visible = en.isIntersecting; if (isTouch) m.target = en.isIntersecting ? 1 : 0.46; }
+  }, { threshold: 0.04 });
+  motifs.forEach(m => io.observe(m.el));
+
+  // — hidden room: Conway's Game of Life, the ancestor (Konami code: ↑↑↓↓←→←→ B A) —
+  function showToast(msg){ let t=document.getElementById("eggtoast"); if(!t){ t=document.createElement("div"); t.id="eggtoast"; t.className="eggtoast"; document.body.appendChild(t); } t.textContent=msg; requestAnimationFrame(()=>t.classList.add("show")); clearTimeout(t.__h); t.__h=setTimeout(()=>t.classList.remove("show"),2800); }
+  function revealAncestor(){
+    const existing=document.getElementById("ancestor");
+    if(existing){ existing.scrollIntoView({behavior:reduceMotion?"auto":"smooth",block:"center"}); return; }
+    const c={ name:"Genesis", tag:"Conway's Game of Life · 1970 · the ancestor", tech:"the hidden room", href:"conway/index.html", accent:"#5dff9b", motif:"conway" };
+    const a=document.createElement("a"); a.className="card wide ancestor"; a.id="ancestor"; a.href=c.href;
+    a.setAttribute("aria-label", c.name+" — "+c.tag);
+    a.innerHTML=`<div class="accentbar" style="background:${c.accent}" aria-hidden="true"></div><canvas aria-hidden="true"></canvas><div class="grad" aria-hidden="true"></div><div class="enter" style="color:${c.accent}" aria-hidden="true">enter →</div><div class="body"><div><div class="num">✦ secret</div><h2>${c.name}</h2><div class="tag">${c.tag}</div></div><div class="tech">${c.tech}</div></div>`;
+    grid.appendChild(a);
+    const cv=a.querySelector("canvas"); const m={ cv, ctx:cv.getContext("2d"), card:c, el:a, visible:true, energy:0.75, target:0.9, state:null, w:0, h:0 };
+    const dprc=Math.min(devicePixelRatio||1,2); const r=cv.getBoundingClientRect();
+    m.w=Math.max(2,Math.floor(r.width*dprc)); m.h=Math.max(2,Math.floor(r.height*dprc)); cv.width=m.w; cv.height=m.h; m.dpr=dprc;
+    m.ctx.fillStyle="#060607"; m.ctx.fillRect(0,0,m.w,m.h); initState(m);
+    if(!isTouch){ a.addEventListener("pointerenter",()=>m.target=1); a.addEventListener("pointerleave",()=>m.target=0.75); }
+    motifs.push(m); io.observe(a);
+    if(reduceMotion){ for(let i=0;i<160;i++){ m.energy=0.8; drawMotif(m,0.03); } }
+    requestAnimationFrame(()=>a.scrollIntoView({behavior:reduceMotion?"auto":"smooth",block:"center"}));
+    showToast("✦ you found the ancestor");
+  }
+  const KONAMI=["arrowup","arrowup","arrowdown","arrowdown","arrowleft","arrowright","arrowleft","arrowright","b","a"];
+  let kpos=0;
+  addEventListener("keydown",(e)=>{ const k=e.key.toLowerCase(); if(k===KONAMI[kpos]){ kpos++; if(kpos===KONAMI.length){ kpos=0; revealAncestor(); } } else { kpos=(k===KONAMI[0])?1:0; } });
+
+  sizeAll();
+  // respect reduced motion: compose a single static frame instead of an endless loop
+  if (reduceMotion) composeStatic();
+  else requestAnimationFrame(loop);
+
+  if(location.search.includes("debug")) window.__pump=(k=200,dt=0.033)=>{ for(let i=0;i<k;i++) for(const m of motifs){ m.energy+=(m.target-m.energy)*0.15; drawMotif(m,dt);} return motifs.map(m=>({name:m.card.name, n:(m.state&&m.state.nodes)?m.state.nodes.length:undefined})); };
+})();
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));</script>
+</body>
+</html>

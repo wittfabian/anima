@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>MYCELIA — a mind without a brain</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="Mycelia — a mind without a brain" />
+<meta property="og:description" content="A million-agent Physarum slime-mould weaving optimal transport networks on the GPU. Part of ANIMA." />
+<meta property="og:image" content="../og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Mycelia — a mind without a brain" />
+<meta name="twitter:description" content="A million-agent Physarum slime-mould weaving optimal transport networks on the GPU. Part of ANIMA." />
+<meta name="twitter:image" content="../og-image.png" />
+
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  /* ============================================================
+     MYCELIA — Physarum (slime-mould) transport networks on the GPU.
+     Aesthetic: bioluminescent / mycological, acid-lime accent.
+     ============================================================ */
+  :root{
+    --bg:#04060a; --ink:#e9f0e6; --muted:#7a8a72; --muted2:#4c5a47;
+    --line:rgba(190,255,150,0.08); --line2:rgba(190,255,150,0.18);
+    --accent:#aef24a; --accent2:#d4ff8e; --accentdim:rgba(174,242,74,0.12);
+    --disp:"Familjen Grotesk",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;}
+  canvas{position:fixed;inset:0;display:block;cursor:crosshair;}
+
+  .mast{position:fixed;top:28px;left:34px;z-index:5;pointer-events:none;animation:fade 1.4s ease both;}
+  .mast h1{font-family:var(--disp);font-weight:700;font-size:31px;letter-spacing:-0.01em;line-height:1;}
+  .mast h1 b{color:var(--accent);}
+  .mast .sub{font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--muted);margin-top:9px;}
+
+  .panel{position:fixed;top:16px;right:16px;bottom:16px;width:312px;z-index:6;display:flex;flex-direction:column;
+    background:rgba(6,10,9,0.74);border:1px solid var(--line);border-radius:15px;
+    backdrop-filter:blur(20px) saturate(120%);-webkit-backdrop-filter:blur(20px) saturate(120%);
+    box-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(190,255,150,0.05);
+    overflow:hidden;transition:transform .55s cubic-bezier(.16,1,.3,1),opacity .4s;animation:pin 1.2s .1s cubic-bezier(.16,1,.3,1) both;}
+  .panel.hidden{transform:translateX(calc(100% + 26px));opacity:0;pointer-events:none;}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:15px 17px 13px;border-bottom:1px solid var(--line);}
+  .head .t{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);}
+  .head .t span{color:var(--accent);}
+  .ib{width:25px;height:25px;display:grid;place-items:center;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;transition:all .18s;}
+  .ib:hover{color:var(--ink);border-color:var(--line2);}
+  .body{flex:1;overflow-y:auto;padding:4px 17px 16px;}
+  .body::-webkit-scrollbar{width:7px;}
+  .body::-webkit-scrollbar-thumb{background:rgba(190,255,150,0.1);border-radius:8px;}
+  .sec{padding:15px 0 3px;}
+  .sec+.sec{border-top:1px solid var(--line);}
+  .st{font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted2);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+  .st::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:9.5px;letter-spacing:0.07em;text-transform:uppercase;padding:7px 10px;border-radius:7px;border:1px solid var(--line);background:rgba(190,255,150,0.015);color:var(--muted);cursor:pointer;transition:all .16s;}
+  .chip:hover{color:var(--ink);border-color:var(--line2);}
+  .chip.on{color:#0a1400;background:var(--accent);border-color:var(--accent);font-weight:600;box-shadow:0 0 16px rgba(174,242,74,0.3);}
+
+  .ctrl{margin-bottom:14px;}
+  .crow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .cl{font-size:11px;color:var(--muted);}
+  .cv{font-size:11px;color:var(--accent2);font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer;}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,var(--accent) var(--fill,0%),rgba(190,255,150,0.13) var(--fill,0%));}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-5px;border-radius:50%;background:#0a140a;border:1.5px solid var(--accent);transition:box-shadow .18s;}
+  input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(174,242,74,0.12);}
+  input[type=range]::-moz-range-track{height:2px;background:rgba(190,255,150,0.13);border-radius:2px;}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#0a140a;border:1.5px solid var(--accent);}
+
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .btn{font-family:var(--mono);font-size:10px;letter-spacing:0.05em;padding:10px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(190,255,150,0.02);color:var(--ink);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn:hover{border-color:var(--line2);background:rgba(190,255,150,0.05);}
+  .btn:active{transform:translateY(1px);}
+  .btn.pri{border-color:var(--accent);color:var(--accent2);background:var(--accentdim);}
+  .btn kbd{font-size:8px;color:var(--muted2);border:1px solid var(--line);border-radius:4px;padding:1px 4px;}
+
+  .foot{flex:0 0 auto;padding:11px 17px;border-top:1px solid var(--line);font-size:9px;letter-spacing:0.1em;color:var(--muted2);display:flex;justify-content:space-between;}
+
+  .reopen{position:fixed;top:16px;right:16px;z-index:6;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(6,10,9,0.74);backdrop-filter:blur(16px);color:var(--accent);display:grid;place-items:center;cursor:pointer;font-size:16px;opacity:0;transform:scale(.85);pointer-events:none;transition:all .4s cubic-bezier(.16,1,.3,1);}
+  .reopen.show{opacity:1;transform:scale(1);pointer-events:auto;}
+
+  .hint{position:fixed;left:34px;bottom:26px;z-index:5;font-size:10px;letter-spacing:0.14em;line-height:1.9;color:var(--muted2);pointer-events:none;animation:fade 2s 0.8s ease both;}
+  .hint b{color:var(--muted);font-weight:400;}
+
+  .err{position:fixed;inset:0;display:none;place-items:center;z-index:30;background:rgba(4,6,10,0.92);padding:40px;text-align:center;}
+  .err.show{display:grid;}
+  .err div{max-width:440px;font-size:13px;line-height:1.7;color:var(--muted);}
+  .err b{color:var(--accent);font-family:var(--disp);font-size:20px;display:block;margin-bottom:14px;}
+
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pin{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+  @media (max-width:740px){.panel{width:auto;left:12px;right:12px;top:auto;bottom:12px;height:54vh;}.hint{display:none}}
+</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <style>
+    .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,0.42);text-decoration:none;padding:7px 15px;border:1px solid rgba(255,255,255,0.12);border-radius:100px;background:rgba(10,10,12,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:color .25s,border-color .25s,opacity .25s;opacity:0.62;}
+    .home-link:hover{color:#fff;border-color:rgba(255,255,255,0.32);opacity:1;}
+  </style>
+  <a class="home-link" href="../index.html" title="back to the gallery">✦&nbsp;anima</a>
+
+  <div class="mast">
+    <h1>MY<b>CELIA</b></h1>
+    <div class="sub">a mind without a brain</div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <div class="head"><div class="t">COLONY <span>/ console</span></div><button class="ib" id="hide">›</button></div>
+    <div class="body">
+      <div class="sec"><div class="st">Behaviours</div><div class="chips" id="presets"></div></div>
+      <div class="sec"><div class="st">Palette</div><div class="chips" id="themes"></div></div>
+      <div class="sec" id="sliders"></div>
+      <div class="sec"><div class="st">Actions</div>
+        <div class="acts">
+          <button class="btn pri" id="pause"><span>Pause</span><kbd>Space</kbd></button>
+          <button class="btn" id="seed">Re-seed <kbd>N</kbd></button>
+          <button class="btn" id="clear">Clear <kbd>C</kbd></button>
+          <button class="btn" id="save">Save <kbd>S</kbd></button>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span id="fpreset">WEB</span><span id="fcount">—</span></div>
+  </aside>
+  <button class="reopen" id="reopen">⚙</button>
+
+  <div class="hint"><div><b>drag</b> to feed the colony</div><div><b>1–5</b> behaviours &nbsp; <b>space</b> pause &nbsp; <b>N</b> re-seed</div></div>
+
+  <div class="err" id="err"><div><b>No WebGL2</b>MYCELIA needs WebGL2 with float render targets. Try a recent Chrome, Firefox or Safari with hardware acceleration enabled.</div></div>
+
+<script>
+"use strict";
+(() => {
+  const canvas=document.getElementById("c");
+  const gl=canvas.getContext("webgl2",{antialias:false,preserveDrawingBuffer:true});
+  if(!gl || !gl.getExtension("EXT_color_buffer_float")){ document.getElementById("err").classList.add("show"); return; }
+  gl.getExtension("OES_texture_float_linear");
+  gl.getExtension("EXT_float_blend");
+
+  /* ---------- state ---------- */
+  const state={ sensorAngle:0.40, sensorDist:11, turnAngle:0.45, step:1.1, decay:0.90, deposit:1.0, gain:4.0, pop:1024, theme:0 };
+  const PRESETS={
+    WEB:    {sensorAngle:0.40, sensorDist:11, turnAngle:0.45, step:1.1, decay:0.90},
+    VEINS:  {sensorAngle:0.34, sensorDist:18, turnAngle:0.30, step:1.4, decay:0.945},
+    CELLS:  {sensorAngle:0.95, sensorDist:6,  turnAngle:0.75, step:0.8, decay:0.86},
+    SWARM:  {sensorAngle:0.18, sensorDist:9,  turnAngle:0.20, step:1.7, decay:0.88},
+    LACE:   {sensorAngle:0.62, sensorDist:23, turnAngle:0.60, step:1.0, decay:0.955},
+  };
+  const PORDER=Object.keys(PRESETS);
+  const THEMES=[
+    {name:"Spore",  a:[0.08,0.14,0.06], b:[0.45,0.55,0.30], c:[1.0,1.0,1.0], d:[0.20,0.05,0.30]},
+    {name:"Lumen",  a:[0.10,0.18,0.20], b:[0.45,0.50,0.55], c:[1.0,1.0,1.0], d:[0.50,0.45,0.40]},
+    {name:"Amber",  a:[0.18,0.12,0.06], b:[0.50,0.42,0.28], c:[1.0,1.0,1.0], d:[0.05,0.12,0.22]},
+    {name:"Plasma", a:[0.18,0.10,0.20], b:[0.50,0.40,0.55], c:[1.0,1.0,1.0], d:[0.15,0.30,0.55]},
+    {name:"Mono",   a:[0.50,0.50,0.50], b:[0.50,0.50,0.50], c:[1.0,1.0,1.0], d:[0.00,0.00,0.00]},
+  ];
+  const SLIDERS=[
+    {key:"sensorAngle",label:"Sensor angle", min:0.05,max:1.40,step:0.01, fmt:v=>v.toFixed(2)},
+    {key:"sensorDist", label:"Sensor reach", min:1,   max:30,  step:0.5,  fmt:v=>v.toFixed(1)},
+    {key:"turnAngle",  label:"Turn",         min:0.05,max:1.40,step:0.01, fmt:v=>v.toFixed(2)},
+    {key:"step",       label:"Speed",        min:0.2, max:3.0, step:0.05, fmt:v=>v.toFixed(2)},
+    {key:"decay",      label:"Decay",        min:0.80,max:0.99,step:0.005,fmt:v=>v.toFixed(3)},
+    {key:"gain",       label:"Glow",         min:1,   max:16,  step:0.5,  fmt:v=>v.toFixed(1)},
+    {key:"pop",        label:"Population",   min:256, max:1408,step:128,  pop:true, fmt:v=>{const n=v*v; return n>=1e6?(n/1e6).toFixed(2)+"M":Math.round(n/1e3)+"k";}},
+  ];
+
+  /* ---------- gl helpers ---------- */
+  function sh(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) console.error("shader:",gl.getShaderInfoLog(s),src); return s; }
+  function prog(vs,fs){ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) console.error("link:",gl.getProgramInfoLog(p)); return p; }
+
+  const QUAD_VS=`#version 300 es
+  layout(location=0) in vec2 p; out vec2 v_uv;
+  void main(){ v_uv=p*0.5+0.5; gl_Position=vec4(p,0.,1.); }`;
+
+  // agent update: one texel per agent -> (x,y,heading)
+  const AGENT_FS=`#version 300 es
+  precision highp float;
+  uniform sampler2D u_agents, u_trail;
+  uniform vec2 u_texelT; uniform float u_sensorAngle,u_sensorDist,u_turn,u_step,u_time;
+  in vec2 v_uv; out vec4 o;
+  float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+  float sense(vec2 pos, float ang){ vec2 d=vec2(cos(ang),sin(ang)); vec2 uv=pos + d*u_sensorDist*u_texelT; uv=fract(uv); return texture(u_trail,uv).r; }
+  void main(){
+    vec4 a=texture(u_agents,v_uv); vec2 pos=a.xy; float h=a.z;
+    float F=sense(pos,h), L=sense(pos,h+u_sensorAngle), R=sense(pos,h-u_sensorAngle);
+    float rnd=hash(v_uv+fract(u_time));
+    if(F>L && F>R){}
+    else if(F<L && F<R){ h += (rnd<0.5?-1.0:1.0)*u_turn; }
+    else if(L<R){ h -= u_turn; }
+    else if(R<L){ h += u_turn; }
+    vec2 dir=vec2(cos(h),sin(h));
+    pos += dir*u_step*u_texelT;
+    pos=fract(pos);
+    o=vec4(pos,h,1.0);
+  }`;
+
+  // deposit: draw each agent as a point into the trail (additive)
+  const DEP_VS=`#version 300 es
+  uniform sampler2D u_agents; uniform int u_side;
+  void main(){ int id=gl_VertexID; ivec2 tc=ivec2(id%u_side, id/u_side); vec4 a=texelFetch(u_agents,tc,0); gl_Position=vec4(a.xy*2.0-1.0,0.,1.); gl_PointSize=1.0; }`;
+  const DEP_FS=`#version 300 es
+  precision highp float; uniform float u_deposit; out vec4 o;
+  void main(){ o=vec4(u_deposit,0.,0.,1.); }`;
+
+  // diffuse + decay (+ mouse feed)
+  const DIFF_FS=`#version 300 es
+  precision highp float;
+  uniform sampler2D u_trail; uniform vec2 u_texelT; uniform float u_decay;
+  uniform vec2 u_mouse; uniform float u_mouseR, u_mouseAmt, u_aspect;
+  in vec2 v_uv; out vec4 o;
+  void main(){
+    float s=0.0;
+    for(int y=-1;y<=1;y++) for(int x=-1;x<=1;x++) s += texture(u_trail, v_uv+vec2(float(x),float(y))*u_texelT).r;
+    float v=(s/9.0)*u_decay;
+    if(u_mouse.x>=0.0){ vec2 d=(v_uv-u_mouse); d.x*=u_aspect; float dist=length(d); if(dist<u_mouseR) v += u_mouseAmt*smoothstep(u_mouseR,0.0,dist); }
+    o=vec4(v,0.,0.,1.);
+  }`;
+
+  // display
+  const DISP_FS=`#version 300 es
+  precision highp float;
+  uniform sampler2D u_trail; uniform float u_gain; uniform vec3 pa,pb,pc,pd;
+  in vec2 v_uv; out vec4 o;
+  vec3 pal(float t){ return pa+pb*cos(6.28318*(pc*t+pd)); }
+  void main(){
+    float v=texture(u_trail,v_uv).r;
+    float t=clamp(v*u_gain,0.0,1.0); t=pow(t,0.72);
+    vec3 col=pal(t)*t;
+    vec2 q=v_uv-0.5; col*=1.0-dot(q,q)*0.55;
+    o=vec4(col,1.0);
+  }`;
+
+  const pAgent=prog(QUAD_VS,AGENT_FS), pDep=prog(DEP_VS,DEP_FS), pDiff=prog(QUAD_VS,DIFF_FS), pDisp=prog(QUAD_VS,DISP_FS);
+
+  // quad + VAOs
+  const quadBuf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const quadVAO=gl.createVertexArray(); gl.bindVertexArray(quadVAO); gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  const emptyVAO=gl.createVertexArray();
+  gl.bindVertexArray(null);
+
+  /* ---------- textures ---------- */
+  let side, simW, simH;
+  let agA,agB,agFA,agFB, trA,trB,trFA,trFB;
+  function tex(w,h,internal,filter){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,internal,w,h,0,gl.RGBA,gl.FLOAT,null); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,filter); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,filter); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT); return t; }
+  function fbo(t){ const f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0); return f; }
+
+  function allocTrail(){
+    const LONG=1700, asp=innerWidth/innerHeight;
+    if(asp>=1){ simW=LONG; simH=Math.max(2,Math.round(LONG/asp)); } else { simH=LONG; simW=Math.max(2,Math.round(LONG*asp)); }
+    trA=tex(simW,simH,gl.RGBA16F,gl.LINEAR); trFA=fbo(trA);
+    trB=tex(simW,simH,gl.RGBA16F,gl.LINEAR); trFB=fbo(trB);
+    clearTrail();
+  }
+  function allocAgents(){
+    side=state.pop;
+    agA=tex(side,side,gl.RGBA32F,gl.NEAREST); agFA=fbo(agA);
+    agB=tex(side,side,gl.RGBA32F,gl.NEAREST); agFB=fbo(agB);
+    seed();
+    document.getElementById("fcount").textContent=(side*side>=1e6?(side*side/1e6).toFixed(2)+"M":Math.round(side*side/1e3)+"k")+" agents";
+  }
+  function seed(){
+    const d=new Float32Array(side*side*4);
+    for(let i=0;i<side*side;i++){
+      // seed in a central disc for a strong emergent bloom
+      const ang=Math.random()*6.283, rad=Math.sqrt(Math.random())*0.32;
+      d[i*4]=0.5+Math.cos(ang)*rad; d[i*4+1]=0.5+Math.sin(ang)*rad;
+      d[i*4+2]=Math.random()*6.283; d[i*4+3]=1.0;
+    }
+    gl.bindTexture(gl.TEXTURE_2D,agA); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,side,side,0,gl.RGBA,gl.FLOAT,d);
+    gl.bindTexture(gl.TEXTURE_2D,agB); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,side,side,0,gl.RGBA,gl.FLOAT,d);
+  }
+  function clearTrail(){ for(const f of [trFA,trFB]){ gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT); } }
+
+  /* ---------- uniforms ---------- */
+  const U=(p,names)=>{const o={};names.forEach(n=>o[n]=gl.getUniformLocation(p,n));return o;};
+  const uAg=U(pAgent,["u_agents","u_trail","u_texelT","u_sensorAngle","u_sensorDist","u_turn","u_step","u_time"]);
+  const uDep=U(pDep,["u_agents","u_side","u_deposit"]);
+  const uDiff=U(pDiff,["u_trail","u_texelT","u_decay","u_mouse","u_mouseR","u_mouseAmt","u_aspect"]);
+  const uDisp=U(pDisp,["u_trail","u_gain","pa","pb","pc","pd"]);
+
+  /* ---------- pointer ---------- */
+  let down=false, mx=-1, my=-1;
+  function setM(e){ mx=e.clientX/innerWidth; my=1-e.clientY/innerHeight; }
+  canvas.addEventListener("pointerdown",e=>{ down=true; setM(e); canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove",e=>{ if(down) setM(e); });
+  canvas.addEventListener("pointerup",()=>down=false);
+  canvas.addEventListener("pointercancel",()=>down=false);
+  canvas.addEventListener("contextmenu",e=>e.preventDefault());
+
+  /* ---------- frame ---------- */
+  let frameN=0;
+  function frame(){
+    const texelT=[1/simW,1/simH];
+    // 1) update agents
+    gl.bindFramebuffer(gl.FRAMEBUFFER,agFB); gl.viewport(0,0,side,side);
+    gl.useProgram(pAgent); gl.bindVertexArray(quadVAO);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,agA); gl.uniform1i(uAg.u_agents,0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,trA); gl.uniform1i(uAg.u_trail,1);
+    gl.uniform2f(uAg.u_texelT,texelT[0],texelT[1]);
+    gl.uniform1f(uAg.u_sensorAngle,state.sensorAngle); gl.uniform1f(uAg.u_sensorDist,state.sensorDist);
+    gl.uniform1f(uAg.u_turn,state.turnAngle); gl.uniform1f(uAg.u_step,state.step); gl.uniform1f(uAg.u_time,(frameN%1000)*0.137);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+    [agA,agB]=[agB,agA]; [agFA,agFB]=[agFB,agFA];
+
+    // 2) deposit agents into trail (additive)
+    gl.bindFramebuffer(gl.FRAMEBUFFER,trFA); gl.viewport(0,0,simW,simH);
+    gl.useProgram(pDep); gl.bindVertexArray(emptyVAO);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,agA); gl.uniform1i(uDep.u_agents,0);
+    gl.uniform1i(uDep.u_side,side); gl.uniform1f(uDep.u_deposit,state.deposit);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE,gl.ONE);
+    gl.drawArrays(gl.POINTS,0,side*side);
+    gl.disable(gl.BLEND);
+
+    // 3) diffuse + decay (+mouse) -> trB
+    gl.bindFramebuffer(gl.FRAMEBUFFER,trFB); gl.viewport(0,0,simW,simH);
+    gl.useProgram(pDiff); gl.bindVertexArray(quadVAO);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,trA); gl.uniform1i(uDiff.u_trail,0);
+    gl.uniform2f(uDiff.u_texelT,texelT[0],texelT[1]); gl.uniform1f(uDiff.u_decay,state.decay);
+    gl.uniform2f(uDiff.u_mouse, down?mx:-1.0, down?my:-1.0); gl.uniform1f(uDiff.u_mouseR,0.05); gl.uniform1f(uDiff.u_mouseAmt,1.4); gl.uniform1f(uDiff.u_aspect,simW/simH);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+    [trA,trB]=[trB,trA]; [trFA,trFB]=[trFB,trFA];
+
+    frameN++;
+  }
+  function draw(){
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,canvas.width,canvas.height);
+    gl.useProgram(pDisp); gl.bindVertexArray(quadVAO);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,trA); gl.uniform1i(uDisp.u_trail,0);
+    gl.uniform1f(uDisp.u_gain,state.gain);
+    const th=THEMES[state.theme]; gl.uniform3fv(uDisp.pa,th.a); gl.uniform3fv(uDisp.pb,th.b); gl.uniform3fv(uDisp.pc,th.c); gl.uniform3fv(uDisp.pd,th.d);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+  }
+  let paused=false;
+  function loop(){ if(!paused) frame(); draw(); requestAnimationFrame(loop); }
+
+  /* ---------- sizing ---------- */
+  function resize(){ const d=Math.min(devicePixelRatio||1,2); canvas.width=Math.floor(innerWidth*d); canvas.height=Math.floor(innerHeight*d); canvas.style.width=innerWidth+"px"; canvas.style.height=innerHeight+"px"; }
+  let rt; addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{ resize(); allocTrail(); },220); });
+
+  /* ---------- UI ---------- */
+  const presetsHost=document.getElementById("presets"),themesHost=document.getElementById("themes"),slidersHost=document.getElementById("sliders"),foot=document.getElementById("fpreset");
+  const sEls={};
+  function applyPreset(name){ Object.assign(state,PRESETS[name]); syncSliders(); [...presetsHost.children].forEach(c=>c.classList.toggle("on",c.textContent===name)); foot.textContent=name; clearTrail(); seed(); }
+  PORDER.forEach(n=>{ const c=document.createElement("button"); c.className="chip"; c.textContent=n; c.onclick=()=>applyPreset(n); presetsHost.appendChild(c); });
+  THEMES.forEach((t,i)=>{ const c=document.createElement("button"); c.className="chip"+(i===state.theme?" on":""); c.textContent=t.name; c.onclick=()=>{ state.theme=i; [...themesHost.children].forEach((e,j)=>e.classList.toggle("on",j===i)); }; themesHost.appendChild(c); });
+
+  const sh2=document.createElement("div"); sh2.className="st"; sh2.textContent="Chemistry"; slidersHost.appendChild(sh2);
+  SLIDERS.forEach(cfg=>{
+    const w=document.createElement("div"); w.className="ctrl";
+    w.innerHTML=`<div class="crow"><span class="cl">${cfg.label}</span><span class="cv" id="cv-${cfg.key}"></span></div>`;
+    const inp=document.createElement("input"); inp.type="range"; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=state[cfg.key];
+    const handler=()=>{ state[cfg.key]=parseFloat(inp.value); upd(cfg,inp); };
+    inp.oninput=()=>{ if(cfg.pop){ upd(cfg,inp); return; } handler(); foot.textContent="CUSTOM"; [...presetsHost.children].forEach(c=>c.classList.remove("on")); };
+    if(cfg.pop) inp.onchange=()=>{ state.pop=parseInt(inp.value); upd(cfg,inp); allocAgents(); };
+    w.appendChild(inp); slidersHost.appendChild(w); sEls[cfg.key]=inp;
+  });
+  function upd(cfg,inp){ inp.style.setProperty("--fill",((inp.value-cfg.min)/(cfg.max-cfg.min)*100)+"%"); document.getElementById("cv-"+cfg.key).textContent=cfg.fmt(parseFloat(inp.value)); }
+  function syncSliders(){ SLIDERS.forEach(cfg=>{ const i=sEls[cfg.key]; i.value=state[cfg.key]; upd(cfg,i); }); }
+
+  const panel=document.getElementById("panel"),reopen=document.getElementById("reopen");
+  function togglePanel(f){ const h=f!==undefined?f:!panel.classList.contains("hidden"); panel.classList.toggle("hidden",h); reopen.classList.toggle("show",h); }
+  function setPaused(p){ paused=p; document.querySelector("#pause span").textContent=paused?"Resume":"Pause"; }
+  function save(){ draw(); const a=document.createElement("a"); a.download=`mycelia-${Date.now()}.png`; a.href=canvas.toDataURL("image/png"); a.click(); }
+  document.getElementById("pause").onclick=()=>setPaused(!paused);
+  document.getElementById("seed").onclick=()=>{ clearTrail(); seed(); };
+  document.getElementById("clear").onclick=()=>clearTrail();
+  document.getElementById("save").onclick=save;
+  document.getElementById("hide").onclick=()=>togglePanel(true);
+  reopen.onclick=()=>togglePanel(false);
+  addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT")return; const k=e.key.toLowerCase();
+    if(k===" "){e.preventDefault();setPaused(!paused);} else if(k==="n"){clearTrail();seed();} else if(k==="c")clearTrail(); else if(k==="s")save(); else if(k==="h")togglePanel();
+    else if(k>="1"&&k<="5"){ const i=+k-1; if(i<PORDER.length)applyPreset(PORDER[i]); } });
+
+  /* ---------- boot ---------- */
+  resize(); allocTrail(); allocAgents(); syncSliders();
+  applyPreset("WEB");
+  requestAnimationFrame(loop);
+
+  if(location.search.includes("debug")) window.__pump=(k=200)=>{ for(let i=0;i<k;i++) frame(); draw(); return {agents:side*side,sim:[simW,simH]}; };
+})();
+</script>
+<script src="../anima-nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ANIMA · Codex — the science behind the cabinet</title>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ANIMA" />
+<meta property="og:title" content="ANIMA · Codex — the science behind the cabinet" />
+<meta property="og:description" content="The field guide to ANIMA: the science, history and mathematics behind each generative world, with cited sources." />
+<meta property="og:image" content="../og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="ANIMA · Codex — the science behind the cabinet" />
+<meta name="twitter:description" content="The field guide to ANIMA: the science, history and mathematics behind each generative world, with cited sources." />
+<meta name="twitter:image" content="../og-image.png" />
+
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<meta name="theme-color" content="#07070b" />
+<meta name="description" content="The Codex of ANIMA — the science, history and mathematics behind seven generative worlds: particle life, flow fields, reaction-diffusion, cymatics, slime mould, differential growth, and SmoothLife." />
+<link rel="stylesheet" href="../fonts/anima-fonts.css" />
+<style>
+  :root{
+    --bg:#07070b; --ink:#ece9e3; --soft:#bdbac4; --muted:#8a8794; --muted2:#56545f;
+    --line:rgba(236,233,227,0.10); --line2:rgba(236,233,227,0.2);
+    --didone:"Bodoni Moda",Georgia,serif; --serif:"Spectral",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:radial-gradient(140% 120% at 50% -10%, #101015 0%, #07070b 55%, #040406 100%);color:var(--ink);font-family:var(--serif);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .grain{position:fixed;inset:-50%;pointer-events:none;z-index:50;opacity:0.045;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  a{color:inherit;}
+  ::selection{background:rgba(244,164,40,0.25);}
+
+  .home-link{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:12;font-family:var(--mono);font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,0.5);text-decoration:none;padding:7px 15px;border:1px solid rgba(255,255,255,0.14);border-radius:100px;background:rgba(10,10,14,0.5);backdrop-filter:blur(12px);transition:color .25s,border-color .25s;}
+  .home-link:hover{color:#fff;border-color:rgba(255,255,255,0.32);}
+  :focus-visible{outline:2px solid #f0c27b;outline-offset:3px;border-radius:3px;}
+
+  .wrap{max-width:760px;margin:0 auto;padding:clamp(70px,12vh,140px) clamp(22px,6vw,40px) 120px;}
+
+  header.masthead{text-align:center;margin-bottom:18px;animation:rise 1s cubic-bezier(.16,1,.3,1) both;}
+  .kick{font-family:var(--mono);font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:var(--muted);}
+  header.masthead h1{font-family:var(--didone);font-weight:400;font-size:clamp(52px,11vw,96px);line-height:0.9;margin:14px 0 6px;letter-spacing:0.01em;}
+  header.masthead h1 i{font-style:italic;}
+  header.masthead .lede{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(16px,2.4vw,21px);color:var(--soft);max-width:30ch;margin:10px auto 0;}
+
+  nav.toc{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 8px;margin:44px 0 80px;padding-top:30px;border-top:1px solid var(--line);animation:rise 1s .12s cubic-bezier(.16,1,.3,1) both;}
+  nav.toc a{font-family:var(--mono);font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:7px 12px;border:1px solid var(--line);border-radius:100px;transition:all .2s;}
+  nav.toc a:hover{color:var(--ink);border-color:var(--line2);}
+
+  article{padding:64px 0;border-top:1px solid var(--line);scroll-margin-top:80px;}
+  article:first-of-type{border-top:0;}
+  .ah{display:flex;align-items:baseline;gap:16px;margin-bottom:6px;}
+  .ah .no{font-family:var(--mono);font-size:12px;letter-spacing:0.2em;color:var(--muted);}
+  article h2{font-family:var(--didone);font-weight:500;font-size:clamp(34px,6vw,52px);line-height:1;letter-spacing:0.01em;}
+  .a-tag{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;margin:14px 0 26px;}
+  .lead{font-size:clamp(17px,2.4vw,20px);color:var(--ink);margin-bottom:26px;font-weight:300;}
+  .lead::first-letter{font-family:var(--didone);font-size:3.1em;line-height:0.8;float:left;padding:6px 12px 0 0;font-weight:500;}
+  .sub{font-family:var(--mono);font-size:10px;letter-spacing:0.26em;text-transform:uppercase;color:var(--muted);margin:34px 0 12px;display:flex;align-items:center;gap:9px;}
+  .sub::after{content:"";flex:1;height:1px;background:var(--line);}
+  p.body{color:var(--soft);margin-bottom:18px;}
+  p.body b{color:var(--ink);font-weight:500;}
+  .facts{list-style:none;margin:6px 0 8px;}
+  .facts li{position:relative;padding-left:26px;margin-bottom:14px;color:var(--soft);}
+  .facts li::before{content:"✦";position:absolute;left:0;top:1px;font-size:12px;}
+  .sources{display:flex;flex-direction:column;gap:7px;margin-top:10px;}
+  .sources a{font-family:var(--mono);font-size:11.5px;letter-spacing:0.02em;color:var(--muted);text-decoration:none;display:flex;gap:9px;align-items:baseline;transition:color .2s;}
+  .sources a:hover{color:var(--ink);}
+  .sources a .arrow{color:var(--muted2);}
+  .open{display:inline-flex;align-items:center;gap:9px;margin-top:32px;font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;padding:11px 18px;border:1px solid var(--line2);border-radius:100px;transition:all .25s;}
+  .open:hover{background:rgba(255,255,255,0.05);}
+
+  footer{margin-top:90px;padding-top:30px;border-top:1px solid var(--line);text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  footer a{color:var(--muted);text-decoration:none;}
+
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+  <div class="grain"></div>
+  <a class="home-link" href="../index.html"><span aria-hidden="true">✦&nbsp;</span>anima</a>
+
+  <div class="wrap">
+    <header class="masthead">
+      <div class="kick">anima · codex</div>
+      <h1>The F<i>i</i>eld Guide</h1>
+      <p class="lede">Seven worlds, and the real science each one is grown from — the ideas, the people, the mathematics.</p>
+    </header>
+    <nav class="toc" id="toc"></nav>
+    <main id="codex"></main>
+    <footer>
+      <span>a cabinet of living things · <a href="../index.html">return to the gallery</a></span>
+    </footer>
+  </div>
+
+<script>
+"use strict";
+const CODEX = [
+  {
+    n:"01", name:"Primordia", slug:"primordia", accent:"#f4a428", tag:"emergent particle life",
+    lead:"Hundreds of coloured particles drift in space, each obeying one trivially simple law — and out of it crawl membranes, cells, and creatures that look unmistakably alive.",
+    history:"The lineage begins with algorithmic artist Jeffrey Ventrella and his <b>Clusters</b> system, whose key idea was to let the forces between species be deliberately <b>unequal</b>. In October 2018 CodeParade (HackerPoet) popularised a stripped-down version under the now-dominant name <b>Particle Life</b>; a wave of reimplementations followed — Hunar Ahmad's famously minimal version, Tom Mohr's optimised Java framework, Nikita Lisitsa's WebGPU build — all crediting Ventrella's root.",
+    mechanism:"Each particle has a position, a velocity and a discrete type (colour). The whole personality of a universe lives in one tiny table: an <b>interaction matrix</b> A[i][j] giving how strongly type i is attracted to (or repelled from) type j. Crucially the matrix need not be symmetric — A[i][j] ≠ A[j][i] — which breaks Newton's third law and makes endless chasing possible. For every pair within a cutoff radius, a force is computed: hard repulsion when very close, an attraction/repulsion band scaled by the matrix in the middle, and exactly zero beyond the cutoff. Heavy velocity damping each step lets fragile structures settle instead of flying apart; a spatial grid keeps the O(n²) search fast.",
+    facts:[
+      "The lifelike behaviour depends on <b>breaking physics</b>: by allowing asymmetric forces, one particle can perpetually chase another that perpetually flees — injecting the apparent 'agency' of living things.",
+      "There is no biology anywhere — no DNA, no fitness function, no neural net. Membranes, motile organisms and self-replication are pure side effects of a few dozen numbers.",
+      "With 6 types there are only 36 numbers in the matrix, yet that handful is enough to span sterile gas to teeming ecosystems.",
+      "Friction is essential, not incidental — a frictionless 'realistic' version would never settle into the patterns the model is famous for."
+    ],
+    sources:[
+      {t:"Jeffrey Ventrella — Intro to Clusters (creator)", u:"https://www.ventrella.com/Clusters/intro.html"},
+      {t:"HackerPoet / CodeParade — Particle-Life (GitHub)", u:"https://github.com/HackerPoet/Particle-Life"},
+      {t:"Nikita Lisitsa — Particle Life with WebGPU (force-function write-up)", u:"https://lisyarus.github.io/blog/posts/particle-life-simulation-in-browser-using-webgpu.html"},
+      {t:"Softology — Clusters and Particle Life (history)", u:"https://softologyblog.wordpress.com/2018/11/08/clusters-and-particle-life/"}
+    ]
+  },
+  {
+    n:"02", name:"Flux", slug:"flux", accent:"#62c7e0", tag:"silk woven from a flow field",
+    lead:"An invisible grid of angles is laid over the canvas; particles released into it trace long, coherent curves that braid together into silk.",
+    history:"The story begins with <b>Ken Perlin</b>, who around 1983 — frustrated by the sterile look of the CGI he was making for <b>TRON</b> — invented Perlin noise, presented in his 1985 SIGGRAPH paper. It earned him a 1997 Academy Award for Technical Achievement; he designed the faster <b>simplex noise</b> in 2001. Decades later, generative artist <b>Tyler Hobbs</b> made noise-driven flow fields a signature of algorithmic art through his 2020 essay 'Flow Fields' and his 2021 collection <b>Fidenza</b>.",
+    mechanism:"A flow field is a 2D grid where each cell holds a single angle θ. A particle looks up the angle beneath it and steps: x += s·cos θ, y += s·sin θ — repeat to draw a curve, release thousands to fill the canvas. The angles come from <b>gradient noise</b>: an invisible lattice of random gradient vectors, blended with a smooth fade curve (6t⁵−15t⁴+10t³) so the field varies continuously. Because adjacent particles read almost-identical angles, they flow together rather than scatter — and that coherence is the entire secret of the silk-like look.",
+    facts:[
+      "Perlin noise was born from movie-making frustration — the CGI for TRON (1982) looked too clean — and later won an Academy Award.",
+      "Perlin never patented the original noise; he did patent simplex noise (2005), and that patent expired in January 2022.",
+      "The flowing look is not coded anywhere — it emerges purely because neighbouring particles receive nearly-identical angles.",
+      "Hobbs warns in his own essay that plain Perlin flow fields are 'so overdone', and champions custom distortions (e.g. rounding angles to discrete increments) instead."
+    ],
+    sources:[
+      {t:"Tyler Hobbs — Flow Fields (essay)", u:"https://www.tylerxhobbs.com/words/flow-fields"},
+      {t:"Ken Perlin — Improved Noise reference (NYU)", u:"https://cs.nyu.edu/~perlin/noise/"},
+      {t:"Perlin noise — Wikipedia", u:"https://en.wikipedia.org/wiki/Perlin_noise"},
+      {t:"Tyler Hobbs — Fidenza", u:"https://www.tylerxhobbs.com/words/fidenza"}
+    ]
+  },
+  {
+    n:"03", name:"Morphogenesis", slug:"morphogenesis", accent:"#5fe6c0", tag:"patterns that grow themselves",
+    lead:"Two interacting virtual chemicals that react and spread at different speeds can break a uniform field into spots, stripes, mazes and spirals — pattern born from sameness.",
+    history:"<b>Alan Turing</b> proposed the idea in his 1952 paper 'The Chemical Basis of Morphogenesis' — just two years before his death — proving that diffusion, normally a smoothing force, can paradoxically <b>destabilise</b> a uniform state into structure. Ignored for decades, it was revived once computers made simulation easy; the specific <b>Gray-Scott</b> reaction was systematically mapped by John Pearson in a 1993 Science paper, and Turing's predictions were experimentally confirmed with chemical droplets as recently as 2014.",
+    mechanism:"Two chemicals U and V evolve by coupled equations. The reaction U + 2V → 3V is <b>autocatalytic</b>: V helps make more of itself (the u·v² term), but only where two V meet one U. A <b>feed</b> rate F pumps fresh U in; a <b>kill</b> rate k removes V. The secret is differential diffusion: V spreads more slowly than U, giving short-range activation with long-range inhibition — a spot ignites locally but starves its neighbours, freezing into a characteristic spacing. With just those two numbers, F and k, a nudge of 0.002 can flip the world from stable dots to a writhing maze to chaos.",
+    facts:[
+      "Diffusion is the villain that becomes the hero: on its own it only blurs, yet paired with reaction it makes a uniform mixture spontaneously break into pattern.",
+      "Turing essentially invented mathematical biology with a paper almost nobody could test — written before practical computers, vindicated ~40 years later.",
+      "In a narrow (F,k) band the model literally reproduces cell division: a spot stretches, pinches, and splits in two — 'mitosis', with no biology built in.",
+      "The same math paints a leopard's spots, a zebra's stripes, sand ripples, and fingerprint ridges — one equation, many kingdoms."
+    ],
+    sources:[
+      {t:"Alan Turing — The Chemical Basis of Morphogenesis (1952, PDF)", u:"https://www.dna.caltech.edu/courses/cs191/paperscs191/turing.pdf"},
+      {t:"John Pearson — Complex Patterns in a Simple System (Science, 1993)", u:"https://www.science.org/doi/10.1126/science.261.5118.189"},
+      {t:"Robert Munafo — Gray-Scott / Pearson's parameterization", u:"https://www.mrob.com/pub/comp/xmorphia/index.html"},
+      {t:"Karl Sims — Reaction-Diffusion Tutorial", u:"https://karlsims.com/rd.html"}
+    ]
+  },
+  {
+    n:"04", name:"Resonance", slug:"resonance", accent:"#f0c27b", tag:"a garden that sings in ripples",
+    lead:"Plant a few singing seeds; each sends out a ring, and where a ring crosses another seed it chimes in turn — a music with no score and no conductor.",
+    history:"It draws on three old ideas. In 1787 <b>Ernst Chladni</b> drew a bow across sand-strewn plates and made sound <b>visible</b> as geometric figures — the birth of what Hans Jenny later named <b>cymatics</b>. From Pythagoras onward we have known that notes whose frequencies form <b>small whole-number ratios</b> sound consonant together. And the <b>pentatonic scale</b> — five notes that almost never clash — appears independently in folk music across nearly every culture on earth.",
+    mechanism:"Each seed's pitch is read from its height and snapped to a pentatonic scale, so any combination is consonant by construction. A seed pulses on its own slow clock, emitting an expanding ring; when that ring sweeps across another seed, the second seed chimes and emits its own ring. That single rule — <b>be triggered, then trigger</b> — turns the dish into an <b>excitable medium</b>: rhythms cascade, interfere, and re-form on their own, the same logic that synchronises fireflies and heart cells. Under the hood each chime is a Web Audio oscillator shaped by a soft attack-and-decay envelope, sent through a convolution reverb so the garden sounds like a vast, gentle room.",
+    facts:[
+      "The pentatonic scale is so deeply consonant and cross-cultural that audiences can sing it back, untaught — Bobby McFerrin famously demonstrates this with a crowd.",
+      "Chladni's 18th-century sand figures proved sound has shape; the same standing-wave physics still governs instruments and loudspeakers.",
+      "Nothing here is sequenced — the rhythm is emergent, an excitable medium where each element only reacts to its neighbours, like fireflies finding a common pulse.",
+      "Consonance traces to Pythagoras: the simpler the frequency ratio (2:1 octave, 3:2 fifth), the more 'resolved' two notes sound together."
+    ],
+    sources:[
+      {t:"Cymatics — Wikipedia", u:"https://en.wikipedia.org/wiki/Cymatics"},
+      {t:"Ernst Chladni — Wikipedia", u:"https://en.wikipedia.org/wiki/Ernst_Chladni"},
+      {t:"Pentatonic scale — Wikipedia", u:"https://en.wikipedia.org/wiki/Pentatonic_scale"},
+      {t:"Excitable medium — Wikipedia", u:"https://en.wikipedia.org/wiki/Excitable_medium"}
+    ]
+  },
+  {
+    n:"05", name:"Mycelia", slug:"mycelia", accent:"#aef24a", tag:"a mind without a brain",
+    lead:"A brainless, single-celled slime mould grows efficient transport networks — and a swarm of dead-simple software agents reproduces them from nothing but local sensing.",
+    history:"In 2000 <b>Toshiyuki Nakagaki</b> showed in Nature that Physarum could solve a maze. The landmark came in 2010, when <b>Tero, Nakagaki</b> and colleagues fed the organism an oat-flake map of greater Tokyo and watched it grow a network rivalling the real Tokyo rail system in cost, efficiency and fault tolerance. In parallel, <b>Jeff Jones</b> (UWE Bristol) published the bottom-up multi-agent model that generative artists now implement.",
+    mechanism:"A 2D grid holds a single <b>trail</b> (chemoattractant) field, populated by thousands of point agents. Each step, every agent does three things: it <b>senses</b> the trail at three points ahead (front-left, centre, right); it <b>steers</b> by a fixed angle toward the strongest reading; and it <b>moves</b> forward and <b>deposits</b> a little trail of its own. Then the whole field is blurred (diffusion) and faded (evaporation). The crucial feedback is self-reinforcement — agents deposit trail, trail attracts agents — so faint paths either brighten into veins or evaporate away, and branching transport networks emerge with no planner.",
+    facts:[
+      "The slime mould has no brain and no nervous system — it is one giant cell with millions of nuclei — yet it produced a rail design competitive with decades of human engineering.",
+      "Researchers steered it with light (which it avoids), painting Tokyo's mountains and lakes as bright no-go zones onto the agar.",
+      "Nakagaki won two Ig Nobel Prizes for this lineage: 2008 (the maze) and 2010 (the rail network).",
+      "In Jones' model the agents have no goal and no memory; the whole network is an emergent side-effect of each particle chasing the strongest smell directly ahead — the same logic as ant-colony optimisation."
+    ],
+    sources:[
+      {t:"Tero et al. — Rules for Biologically Inspired Adaptive Network Design (Science, 2010)", u:"https://www.science.org/doi/10.1126/science.1177894"},
+      {t:"Jeff Jones — Pattern Formation in Physarum Transport Networks (Artificial Life, 2010)", u:"https://pubmed.ncbi.nlm.nih.gov/20067403/"},
+      {t:"Slime design mimics Tokyo's rail system (ScienceDaily)", u:"https://www.sciencedaily.com/releases/2010/01/100121141051.htm"}
+    ]
+  },
+  {
+    n:"06", name:"Folia", slug:"folia", accent:"#6f9e6a", tag:"growth that folds in on itself",
+    lead:"Grow a curve by inserting new nodes faster than the surrounding space can absorb them, and the line has no choice but to crinkle, ruffle, and fold — brain coral, lettuce edges, unfurling petals.",
+    history:"The seed is biological: Harvard's <b>L. Mahadevan</b> and collaborators showed (PNAS, 2009) that the rippled edges of leaves arise when the margin grows faster than the interior, buckling the tissue. The studio <b>Nervous System</b> translated this into their <b>Floraform</b> system (2014-15), growing 3D-printed jewellery; the 2D 'differential line' variant spread through creative coding and was consolidated by <b>Jason Webb</b>'s 2019 open-source experiments.",
+    mechanism:"Start with a path of nodes joined by edges. Each step, three forces act: <b>attraction</b> pulls each node toward its path-neighbours; <b>alignment</b> drifts it toward their midpoint, smoothing curvature; and <b>repulsion</b> pushes it away from <i>all</i> nearby nodes — not just neighbours — so distant parts of the curve refuse to overlap. The crucial fourth ingredient is <b>growth</b>: whenever an edge stretches too long, a new node is split into its midpoint. Because length is injected faster than the bounded space can hold it, the curve is perpetually overcrowded — and it relieves that compression the only way it can, by buckling into ever-finer folds.",
+    facts:[
+      "The mechanism is about <b>frustration</b>, not design — nobody draws the folds; they are simply how the curve relieves the stress of being overcrowded, the same physics that ruffles a real lettuce leaf.",
+      "Without the growth step the system is boring: attraction, alignment and repulsion alone relax to a smooth circle. The ongoing node-insertion is what generates the complexity.",
+      "Repulsion must act globally — far-apart sections must sense and dodge each other — or the signature self-avoiding folds never appear.",
+      "Floraform wasn't just rendered but manufactured: because the simulation has no fixed outcome, every 3D-printed piece is one of a kind."
+    ],
+    sources:[
+      {t:"Nervous System — Floraform: an exploration of differential growth", u:"https://n-e-r-v-o-u-s.com/blog/?p=6721"},
+      {t:"Jason Webb — 2D differential growth experiments (GitHub)", u:"https://github.com/jasonwebb/2d-differential-growth-experiments/blob/master/README.md"},
+      {t:"Liang & Mahadevan — The shape of a long leaf (PNAS, 2009)", u:"https://www.pnas.org/doi/10.1073/pnas.0911954106"}
+    ]
+  },
+  {
+    n:"07", name:"Animalcula", slug:"animalcula", accent:"#b98cff", tag:"small living things that emerge from noise",
+    lead:"Take Conway's Game of Life out of its rigid world of square cells and ticking generations, dissolve it into a smooth medium — and soft, self-propelled creatures glide out of the static.",
+    history:"Conway's <b>Game of Life</b> (1970) is the ancestor. In November 2011 <b>Stephan Rafler</b> posted <b>SmoothLife</b> (arXiv:1111.1567), the first continuous 2D cellular automaton reported to host self-propelled 'smooth gliders'. In December 2018 <b>Bert Wang-Chak Chan</b> generalised it further with <b>Lenia</b> — making state, space and time all continuous — and catalogued <b>over 400 species</b>, including the iconic gliding <b>Orbium</b>. Lenia won the 2018 Virtual Creatures Contest and was named ISAL's Outstanding Publication of 2019.",
+    mechanism:"This world runs <b>SmoothLife</b>. Instead of counting neighbours, each point measures two local averages: <b>M</b>, the fill of an inner disk ('am I alive?'), and <b>N</b>, the fill of a surrounding ring ('how crowded am I?'). Life's crisp birth/death thresholds are softened into <b>sigmoids</b>: an empty cell is born when N lands in a birth interval; a filled one survives in a survival interval. Time itself is smooth — the field relaxes a little toward its target each step (df/dt = S(N,M) − f) rather than snapping. With the right parameters, gliders, wobbling solitons and rotating pairs emerge from random noise.",
+    facts:[
+      "Conway's Game of Life is literally a special case of Lenia — set every resolution to 1 with the right kernel and growth, and the smooth rule collapses back to Conway's exact 1970 rule. The continuum doesn't replace Life; it contains it.",
+      "SmoothLife and Lenia were invented independently, seven years apart, yet produce strikingly similar creatures — convergent evolution in artificial life.",
+      "Lenia is essentially a one-layer convolutional neural network running forever — which is why it became a playground for differentiable artificial-life research.",
+      "The Orbium glider is fragile to discretisation: change the grid or time resolution too far and the smooth creature dissolves — it truly lives in the continuum, only approximated by our pixels."
+    ],
+    sources:[
+      {t:"Stephan Rafler — SmoothLife (arXiv:1111.1567, 2011)", u:"https://arxiv.org/abs/1111.1567"},
+      {t:"Bert Chan — Lenia: Biology of Artificial Life (arXiv:1812.05433, 2018)", u:"https://ar5iv.labs.arxiv.org/html/1812.05433"},
+      {t:"Lenia — Wikipedia", u:"https://en.wikipedia.org/wiki/Lenia"},
+      {t:"Bert Chan — Lenia reference implementation (GitHub)", u:"https://github.com/Chakazul/Lenia"}
+    ]
+  }
+];
+
+const toc = document.getElementById("toc");
+const main = document.getElementById("codex");
+
+CODEX.forEach(w => {
+  const t = document.createElement("a");
+  t.href = "#" + w.slug; t.textContent = w.n + " · " + w.name; t.style.color = "";
+  t.addEventListener("mouseenter", () => t.style.color = w.accent);
+  t.addEventListener("mouseleave", () => t.style.color = "");
+  toc.appendChild(t);
+
+  const art = document.createElement("article");
+  art.id = w.slug;
+  art.innerHTML = `
+    <div class="ah"><span class="no">${w.n} / 07</span><h2 style="color:${w.accent}">${w.name}</h2></div>
+    <div class="a-tag" style="color:${w.accent}">${w.tag}</div>
+    <p class="lead">${w.lead}</p>
+    <div class="sub">Origins</div>
+    <p class="body">${w.history}</p>
+    <div class="sub">The mechanism</div>
+    <p class="body">${w.mechanism}</p>
+    <div class="sub">What surprised us</div>
+    <ul class="facts">${w.facts.map(f => `<li>${f}</li>`).join("")}</ul>
+    <div class="sub">Sources</div>
+    <div class="sources">${w.sources.map(s => `<a href="${s.u}" target="_blank" rel="noopener noreferrer"><span class="arrow">↗</span><span>${s.t}</span></a>`).join("")}</div>
+    <a class="open" href="../${w.slug}/index.html" style="color:${w.accent};border-color:${w.accent}55">Enter ${w.name} →</a>
+  `;
+  main.appendChild(art);
+});
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("../service-worker.js").catch(()=>{}));</script>
+</body>
+</html>
