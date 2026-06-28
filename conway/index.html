@@ -237,7 +237,7 @@
   document.getElementById("hide").onclick=()=>togglePanel(true);
   document.getElementById("hide2").onclick=()=>togglePanel(true);
   reopen.onclick=()=>togglePanel(false);
-  addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT")return; const k=e.key.toLowerCase();
+  addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range")return; const k=e.key.toLowerCase();
     if(k===" "){e.preventDefault();setPaused(!paused);} else if(k===".")stepLife(); else if(k==="r")randomize(); else if(k==="c")clearGrid(); else if(k==="s")save(); else if(k==="h")togglePanel(); });
 
   /* ---------- boot ---------- */

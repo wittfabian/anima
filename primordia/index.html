@@ -1179,7 +1179,7 @@
   help.addEventListener("click", (e) => { if (e.target === help) help.classList.remove("show"); });
 
   window.addEventListener("keydown", (e) => {
-    if (e.target.tagName === "INPUT") return;
+    if (e.target.tagName === "INPUT" && e.target.type !== "range") return;
     const k = e.key.toLowerCase();
     if (k === " ")        { e.preventDefault(); setPaused(!paused); showToast(paused ? "<b>paused</b>" : "<b>resumed</b>"); }
     else if (k === "r")   { document.getElementById("btn-random").click(); }
