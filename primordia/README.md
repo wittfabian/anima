@@ -8,7 +8,7 @@ nothing, **cells, swarms, chasers and rotating galaxies organize themselves**.
 Leave it running; it never repeats.
 
 ```
-Weekly-Fun/primordia/
+anima/primordia/
 └── index.html      ← just open it in a browser
 ```
 
@@ -81,4 +81,4 @@ with a curated set of worlds and an instrument-panel UI.
 
 ---
 
-*Built for the `Weekly-Fun` folder. Have fun rewriting the laws of a tiny universe.* ✦
+*Part of the ANIMA cabinet. Have fun rewriting the laws of a tiny universe.* ✦

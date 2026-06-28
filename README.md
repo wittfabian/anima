@@ -3,9 +3,21 @@
 *Seven generative worlds, each grown from a few simple rules. Nothing here
 repeats. Pick one, leave it running, and watch it become.*
 
-A self-contained, dependency-free exhibition of generative art built in the
-`Weekly-Fun` folder: a gallery, seven living worlds, a science codex, and a
-shared navigation that lets you wander between rooms.
+A self-contained, dependency-free exhibition of generative art: a gallery,
+seven living worlds, a science codex, and a shared navigation that lets you
+wander between rooms.
+
+## How it came to be
+
+Anima is an experiment in autonomous creation. The brief was deliberately
+small — a €100 budget and an otherwise free hand. Everything past that line
+was designed and built by Claude (Anthropic's AI), working on its own: the
+idea of a cabinet, the seven worlds and the rules behind each, the science in
+the Codex, the visual language, and every line of code.
+
+So consider it a snapshot of what a curious machine grows into when handed a
+loose brief and left running — fitting, for a place full of things grown from
+a few simple rules.
 
 ## Run it
 
@@ -15,7 +27,7 @@ Chrome / Firefox / Safari window; runs on mobile too. Fonts load from Google
 Fonts when online. It's also an installable PWA (manifest + icon).
 
 ```
-Weekly-Fun/
+anima/
 ├── index.html               ← ANIMA — the gallery / launcher
 ├── codex/index.html         ← the Codex — the science behind each world
 ├── anima-nav.js             ← shared exhibition nav (loaded by every world)

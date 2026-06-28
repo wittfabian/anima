@@ -7,7 +7,7 @@ offline-capable, installable PWA (service worker + manifest). Just publish the f
 ## Option A — Git (recommended)
 
 ```bash
-cd "Weekly-Fun"
+cd anima
 git init
 git add .
 git commit -m "ANIMA — a cabinet of living things"
@@ -30,7 +30,7 @@ https://<you>.github.io/<repo>/
 ## Option B — No command line
 
 1. Create a new repository on github.com.
-2. “Add file → Upload files”, drag in **the contents** of the `Weekly-Fun` folder
+2. “Add file → Upload files”, drag in **the contents** of the project folder
    (so `index.html` lands at the repo root), commit.
 3. Settings → Pages → Source: Deploy from a branch → `main` / `/ (root)` → Save.
 
@@ -44,9 +44,10 @@ https://<you>.github.io/<repo>/
   instead of the cached ones.
 - **Custom domain (optional):** add a `CNAME` file containing your domain and set the DNS
   records GitHub shows under Settings → Pages.
-- **Perfect Twitter/X cards (optional):** the `og:image` tags use a relative path, which most
-  platforms resolve. For guaranteed absolute URLs, replace `og-image.png` /
-  `../og-image.png` with the full `https://…/og-image.png` once you know the final URL.
+- **Social cards:** `og:image`, `twitter:image` and `og:url` use absolute
+  `https://anima.fabianwitt.de/…` URLs — link-preview crawlers (Twitter/X, LinkedIn, Slack,
+  WhatsApp, …) ignore relative image paths. If you serve this from a different domain, update
+  those absolute URLs to match.
 
 ## What gets published
 

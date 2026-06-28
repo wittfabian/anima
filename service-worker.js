@@ -3,7 +3,7 @@
    and installable. Cache-first, with runtime caching for the rest
    (fonts, images). Bump VERSION to ship updates.
    ============================================================ */
-const VERSION = "anima-v2";
+const VERSION = "anima-v3";
 const CORE = [
   "./",
   "index.html",
