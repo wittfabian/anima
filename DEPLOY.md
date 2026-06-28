@@ -7,7 +7,7 @@ offline-capable, installable PWA (service worker + manifest). Just publish the f
 ## Option A — Git (recommended)
 
 ```bash
-cd "Weekly-Fun"
+cd anima
 git init
 git add .
 git commit -m "ANIMA — a cabinet of living things"
@@ -30,7 +30,7 @@ https://<you>.github.io/<repo>/
 ## Option B — No command line
 
 1. Create a new repository on github.com.
-2. “Add file → Upload files”, drag in **the contents** of the `Weekly-Fun` folder
+2. “Add file → Upload files”, drag in **the contents** of the project folder
    (so `index.html` lands at the repo root), commit.
 3. Settings → Pages → Source: Deploy from a branch → `main` / `/ (root)` → Save.
 
