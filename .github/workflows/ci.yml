@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only: this workflow only lints, it never writes to the repo.
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint & checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so the SW version-guard can diff against the base
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Every check below runs even if an earlier one failed (if: always()),
+      # so a PR surfaces all problems at once instead of one per push.
+      - name: HTML lint (htmlhint)
+        if: always()
+        run: npx --yes htmlhint@1.1.4 --config .github/linters/.htmlhintrc "**/*.html"
+
+      - name: Install ESLint + plugins
+        if: always()
+        run: npm install --no-save --no-package-lock --no-audit --no-fund eslint@9 eslint-plugin-html@8 globals@15
+
+      - name: JS lint — standalone files + inline <script> (eslint)
+        if: always()
+        run: npx eslint --config .github/linters/eslint.config.mjs --no-config-lookup "**/*.js" "**/*.html"
+
+      - name: Internal link & asset check
+        if: always()
+        run: node .github/scripts/check-links.mjs
+
+      - name: Service worker version guard
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        env:
+          SW_GUARD_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/scripts/check-sw-version.mjs "$SW_GUARD_BASE"
