@@ -1,0 +1,28 @@
+# ANIMA — a cabinet of living things
+
+> A self-contained, dependency-free exhibition of generative art: a gallery, seven living worlds, and a science codex. Each world is grown from a few simple rules, runs forever, and never repeats. Live at https://anima.fabianwitt.de/
+
+ANIMA is a static website — every page is a single HTML file with no build step, no framework, and no third-party runtime dependencies (Canvas 2D, WebGL2, Web Audio, and self-hosted fonts only). It is an experiment in autonomous creation: handed a small brief (a €100 budget, otherwise a free hand), Claude (Anthropic's AI) designed and built the concept, the seven worlds and their rules, the science in the Codex, the visual language, and every line of code.
+
+Each world carries a shared navigation capsule (`anima-nav.js`). Per-world controls: **S** saves a PNG, **H** hides the UI, **Space** pauses, arrow keys move between worlds, **G** returns to the gallery. Appending `?debug` to any world's URL exposes an inert `window.__pump(n)` frame-stepper.
+
+## Worlds
+
+- [Primordia — emergent particle life](https://anima.fabianwitt.de/primordia/): Coloured species attract and repel through an editable interaction matrix; cells, swarms, chasers and galaxies emerge. Toroidal space, spatial-grid neighbour search (~O(n)), additive glow. Canvas 2D.
+- [Flux — liquid light](https://anima.fabianwitt.de/flux/): Thousands of agents drift along an animated Perlin flow field, each tracing a luminous thread — silk, ink-in-water, aurora. Canvas 2D + Perlin noise.
+- [Morphogenesis — living patterns](https://anima.fabianwitt.de/morphogenesis/): A Gray-Scott reaction-diffusion system on the GPU; Turing patterns (coral, mazes, mitosis, solitons) emerge and crawl with embossed shading. WebGL2.
+- [Resonance — a generative sound garden](https://anima.fabianwitt.de/resonance/): Plant singing seeds whose ripples chime when they cross other seeds, producing emergent polyrhythms on consonant scales. Web Audio + Canvas 2D.
+- [Mycelia — a mind without a brain](https://anima.fabianwitt.de/mycelia/): A Physarum (slime-mould) simulation entirely on the GPU — 1M+ agents deposit and follow trails, weaving optimal transport networks. WebGL2 (state + chemical field in float textures).
+- [Folia — growth that folds in on itself](https://anima.fabianwitt.de/folia/): A herbarium plate; a closed curve whose nodes repel, link to neighbours and sprout new points, buckling into folds (brain coral, leaves). Canvas 2D · differential growth. The one bright world.
+- [Animalcula — small living things that emerge from noise](https://anima.fabianwitt.de/animalcula/): SmoothLife, the continuous ancestor of Lenia and descendant of Conway's Game of Life — soft self-propelled cells glide, divide and die under a dark-field microscope. WebGL2 · cellular automata.
+
+## Docs
+
+- [Gallery / launcher](https://anima.fabianwitt.de/): The hub — an editorial index that opens each world; "⟳ surprise me" opens a random one.
+- [Codex — the science behind the cabinet](https://anima.fabianwitt.de/codex/): Field guide to the real science, history and mathematics behind each world (Turing's morphogenesis, Ventrella's Clusters, Perlin noise, the Tokyo-rail slime mould, Nervous System's Floraform, Rafler's SmoothLife, Chan's Lenia), with cited sources.
+- [README](https://anima.fabianwitt.de/README.md): Project overview, how to run it, and the structure of the cabinet.
+- [Full project description for LLMs](https://anima.fabianwitt.de/llms-full.txt): The complete, self-contained explanation of ANIMA in one file.
+
+## Optional
+
+- [DEPLOY.md](https://anima.fabianwitt.de/DEPLOY.md): How the static site is hosted on GitHub Pages.
